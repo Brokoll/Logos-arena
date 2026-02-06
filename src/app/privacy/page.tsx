@@ -25,7 +25,7 @@ export default function PrivacyPage() {
                             총칙
                         </h2>
                         <div className="p-6 bg-foreground text-background font-medium italic">
-                            Rogos(이하 개발자)(이하 &apos;회사&apos;라 합니다)는 개인정보 보호법 제30조에 따라 이용자의 개인정보를 보호하고 이와 관련한 고충을 신속하고 원활하게 처리할 수 있도록 하기 위하여 다음과 같이 개인정보처리방침을 수립·공개합니다.
+                            Rogos(이하 &quot;회사&quot;)는 「개인정보 보호법」 제30조의 규정에 따라 이용자의 개인정보를 보호하고, 개인정보와 관련한 이용자의 권익을 보장하기 위하여 다음과 같이 개인정보처리방침을 제정·공표합니다.
                         </div>
                     </section>
 
