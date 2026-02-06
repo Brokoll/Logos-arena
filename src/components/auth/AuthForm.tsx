@@ -77,14 +77,15 @@ export function AuthForm() {
                 <div className="text-center space-y-2">
                     <h2 className="text-2xl font-[900] tracking-tighter uppercase">
                         {isSignUp ? "📝 Join the Arena" : "🔐 Enter the Arena"}
+                        🔐 Enter the Arena
                     </h2>
                     <p className="text-sm opacity-50">
-                        {isSignUp ? "새로운 논리 전사가 되어보세요" : "로그인하여 논쟁에 참여하세요"}
+                        로그인하여 논쟁에 참여하세요
                     </p>
                 </div>
 
-                {/* Social Login */}
-                <div className="space-y-3">
+                {/* Social Login Only */}
+                <div className="space-y-4">
                     <button
                         type="button"
                         onClick={() => {
@@ -100,10 +101,10 @@ export function AuthForm() {
                                 },
                             });
                         }}
-                        className="w-full py-3 flex items-center justify-center gap-2 border-[3px] border-foreground hover:bg-foreground hover:text-background transition-colors font-bold uppercase text-sm"
+                        className="w-full py-4 flex items-center justify-center gap-3 border-[3px] border-foreground hover:bg-foreground hover:text-background transition-all font-black uppercase text-base tracking-wide"
                     >
                         {/* Google Icon SVG */}
-                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="currentColor" />
                             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="currentColor" />
                             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84z" fill="currentColor" />
@@ -112,62 +113,9 @@ export function AuthForm() {
                         Continue with Google
                     </button>
 
-
-                </div>
-
-                <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t border-foreground opacity-20" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-background px-2 opacity-50">Or continue with email</span>
-                    </div>
-                </div>
-
-                <div className="space-y-4">
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Email"
-                        required
-                        className="w-full p-4 border-[3px] border-foreground bg-transparent text-lg font-medium focus:outline-none focus:ring-4 focus:ring-foreground/10 placeholder:opacity-30"
-                    />
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Password"
-                        required
-                        minLength={6}
-                        className="w-full p-4 border-[3px] border-foreground bg-transparent text-lg font-medium focus:outline-none focus:ring-4 focus:ring-foreground/10 placeholder:opacity-30"
-                    />
-
-                    <button
-                        type="submit"
-                        disabled={isLoading || !email || !password}
-                        className={cn(
-                            "w-full py-4 font-black uppercase tracking-tighter border-[3px] border-foreground transition-all",
-                            isLoading || !email || !password
-                                ? "opacity-20 cursor-not-allowed"
-                                : "hover:bg-foreground hover:text-background"
-                        )}
-                    >
-                        {isLoading ? "⏳ Processing..." : isSignUp ? "Sign Up" : "Log In"}
-                    </button>
-
-                    <div className="text-center">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setIsSignUp(!isSignUp);
-                                setMessage(null);
-                            }}
-                            className="text-sm font-bold opacity-50 hover:opacity-100 hover:underline"
-                        >
-                            {isSignUp ? "이미 계정이 있으신가요? 로그인하기" : "계정이 없으신가요? 가입하기"}
-                        </button>
-                    </div>
+                    <p className="text-center text-xs opacity-40 font-medium">
+                        (건전한 토론 문화를 위해 구글 로그인만 지원합니다)
+                    </p>
                 </div>
 
                 {message && (
