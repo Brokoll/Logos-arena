@@ -47,26 +47,26 @@ export default function PrivacyPage() {
                                     <tr className="border-b-[2px] border-foreground">
                                         <td className="p-4 border-r border-foreground font-bold">회원가입 시</td>
                                         <td className="p-4 border-r border-foreground"><span className="px-3 py-1 border-2 border-foreground rounded-full text-[10px] font-black uppercase whitespace-nowrap">필수</span></td>
-                                        <td className="p-4 border-r border-foreground">닉네임, 계정 식별 정보(자체 또는 플랫폼)</td>
-                                        <td className="p-4">이용자 식별 및 서비스 제공</td>
+                                        <td className="p-4 border-r border-foreground">이메일 주소, 이름(닉네임), 프로필 사진 URL, 구글 계정 고유 ID</td>
+                                        <td className="p-4">이용자 식별, 회원 관리 및 서비스 제공</td>
                                     </tr>
                                     <tr className="border-b-[2px] border-foreground">
                                         <td className="p-4 border-r border-foreground font-bold">서비스 이용 시</td>
                                         <td className="p-4 border-r border-foreground"><span className="px-3 py-1 border-2 border-foreground rounded-full text-[10px] font-black uppercase whitespace-nowrap opacity-50">자동</span></td>
-                                        <td className="p-4 border-r border-foreground">기기 정보(OS, 기기 식별자), IP 주소, 게임 이용 기록(플레이 기록, 아이템 구매 내역), 접속 기록, 쿠키</td>
-                                        <td className="p-4">불량 이용 방지, 서비스 개선 및 통계 분석</td>
+                                        <td className="p-4 border-r border-foreground">토론 주장 및 댓글 작성 내역, 투표/좋아요 기록, 활동 점수 및 랭킹 데이터, IP 주소, 기기 정보(OS, 브라우저), 접속 기록, 쿠키</td>
+                                        <td className="p-4">토론 서비스 제공, 부정 이용 방지, 서비스 개선 및 분석</td>
                                     </tr>
                                     <tr className="border-b-[2px] border-foreground">
                                         <td className="p-4 border-r border-foreground font-bold">유료 결제 시</td>
-                                        <td className="p-4 border-r border-foreground"><span className="px-3 py-1 border-2 border-foreground rounded-full text-[10px] font-black uppercase whitespace-nowrap">플랫폼</span></td>
-                                        <td className="p-4 border-r border-foreground">Google Play 주문 번호 등 결제 기록</td>
-                                        <td className="p-4">결제 처리 및 결제 도용 방지</td>
+                                        <td className="p-4 border-r border-foreground"><span className="px-3 py-1 border-2 border-foreground rounded-full text-[10px] font-black uppercase whitespace-nowrap">플랫특</span></td>
+                                        <td className="p-4 border-r border-foreground">결제 승인 번호 및 결제 기록 (기능 도입 시 수집)</td>
+                                        <td className="p-4">결제 처리 및 이용 권한 확인 (현재 모든 서비스 무료)</td>
                                     </tr>
                                     <tr>
                                         <td className="p-4 border-r border-foreground font-bold">고객 문의 시</td>
-                                        <td className="p-4 border-r border-foreground"><span className="px-2 py-0.5 border-2 border-foreground rounded-full text-[10px] font-black uppercase opacity-50">선택</span></td>
-                                        <td className="p-4 border-r border-foreground">이메일 주소, 추가 제공 정보</td>
-                                        <td className="p-4">문의 내용 확인 및 회신</td>
+                                        <td className="p-4 border-r border-foreground"><span className="px-3 py-1 border-2 border-foreground rounded-full text-[10px] font-black uppercase opacity-50">선택</span></td>
+                                        <td className="p-4 border-r border-foreground">이메일 주소, 문의 내용 및 첨부 파일</td>
+                                        <td className="p-4">문의 사항 확인 및 답변 안내</td>
                                     </tr>
                                 </tbody>
                             </table>
