@@ -15,6 +15,8 @@ const noticeSchema = z.object({
 const debateSchema = z.object({
     topic: z.string().min(5, "주제는 최소 5자 이상이어야 합니다."),
     description: z.string().optional(),
+    option_a: z.string().min(1, "선택지 A를 입력하세요.").max(50, "선택지 A는 최대 50자입니다."),
+    option_b: z.string().min(1, "선택지 B를 입력하세요.").max(50, "선택지 B는 최대 50자입니다."),
 });
 
 async function checkAdmin() {
@@ -69,6 +71,8 @@ export async function createDebate(prevState: any, formData: FormData) {
     const rawData = {
         topic: formData.get("topic"),
         description: formData.get("description") || undefined,
+        option_a: formData.get("option_a"),
+        option_b: formData.get("option_b"),
     };
 
     const validation = debateSchema.safeParse(rawData);

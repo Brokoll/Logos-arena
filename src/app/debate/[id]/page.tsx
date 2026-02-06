@@ -79,6 +79,8 @@ export default async function DebatePage({ params }: PageProps) {
                         <div className="animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300">
                             <ArenaClient
                                 debateId={debate.id}
+                                optionA={debate.option_a || "찬성"}
+                                optionB={debate.option_b || "반대"}
                                 initialProArguments={pro}
                                 initialConArguments={con}
                                 user={user}

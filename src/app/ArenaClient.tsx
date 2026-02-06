@@ -9,6 +9,8 @@ import Link from "next/link";
 
 interface ArenaClientProps {
     debateId: string;
+    optionA: string;
+    optionB: string;
     initialProArguments: (Argument & { profiles: Profile | null; is_liked: boolean })[];
     initialConArguments: (Argument & { profiles: Profile | null; is_liked: boolean })[];
     user: User | null;
@@ -17,6 +19,8 @@ interface ArenaClientProps {
 
 export function ArenaClient({
     debateId,
+    optionA,
+    optionB,
     initialProArguments,
     initialConArguments,
     user,
@@ -27,7 +31,7 @@ export function ArenaClient({
 
     const handleSubmit = async (data: {
         debate_id: string;
-        side: "pro" | "con";
+        side: string;
         content: string;
         image_urls?: string[];
     }) => {
@@ -57,7 +61,7 @@ export function ArenaClient({
                 image_urls: data.image_urls || []
             };
 
-            if (data.side === "pro") {
+            if (data.side === optionA) {
                 setProArguments([newArg, ...proArguments]);
             } else {
                 setConArguments([newArg, ...conArguments]);
@@ -73,7 +77,7 @@ export function ArenaClient({
             <section>
                 {/* Argument Form (Handles guest check internally) */}
                 <section>
-                    <ArgumentForm debateId={debateId} currentUser={user} onSubmit={handleSubmit} />
+                    <ArgumentForm debateId={debateId} currentUser={user} optionA={optionA} optionB={optionB} onSubmit={handleSubmit} />
                 </section>
             </section>
 

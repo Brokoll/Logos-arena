@@ -49,6 +49,40 @@ export function DebateForm() {
                         className="w-full bg-background border-[3px] border-foreground p-4 font-medium text-foreground placeholder:opacity-30 focus:outline-none focus:border-opacity-70 transition-all resize-none"
                     />
                 </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label htmlFor="option_a" className="block text-sm font-black uppercase tracking-wider mb-2">
+                            선택지 A *
+                        </label>
+                        <input
+                            type="text"
+                            id="option_a"
+                            name="option_a"
+                            required
+                            maxLength={50}
+                            defaultValue="찬성"
+                            placeholder="예: 찬성, A안, 고양이파"
+                            className="w-full bg-background border-[3px] border-foreground p-4 font-bold text-foreground placeholder:opacity-30 focus:outline-none focus:border-opacity-70 transition-all"
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="option_b" className="block text-sm font-black uppercase tracking-wider mb-2">
+                            선택지 B *
+                        </label>
+                        <input
+                            type="text"
+                            id="option_b"
+                            name="option_b"
+                            required
+                            maxLength={50}
+                            defaultValue="반대"
+                            placeholder="예: 반대, B안, 강아지파"
+                            className="w-full bg-background border-[3px] border-foreground p-4 font-bold text-foreground placeholder:opacity-30 focus:outline-none focus:border-opacity-70 transition-all"
+                        />
+                    </div>
+                </div>
             </div>
 
             {state?.error && (

@@ -13,6 +13,8 @@ CREATE TABLE debates (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   topic TEXT NOT NULL,
   description TEXT,
+  option_a TEXT NOT NULL DEFAULT '찬성',
+  option_b TEXT NOT NULL DEFAULT '반대',
   status TEXT DEFAULT 'active' CHECK (status IN ('active', 'closed')),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );

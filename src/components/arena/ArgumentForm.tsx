@@ -11,17 +11,19 @@ import { LoginModal } from "@/components/ui/LoginModal";
 interface ArgumentFormProps {
     debateId: string;
     currentUser: User | null;
+    optionA: string;
+    optionB: string;
     onSubmit: (data: {
         debate_id: string;
-        side: "pro" | "con";
+        side: string;
         content: string;
         image_urls?: string[];
     }) => Promise<{ success: boolean; error?: string; score?: number; feedback?: string }>;
 }
 
-export function ArgumentForm({ debateId, currentUser, onSubmit }: ArgumentFormProps) {
+export function ArgumentForm({ debateId, currentUser, optionA, optionB, onSubmit }: ArgumentFormProps) {
     const router = useRouter();
-    const [side, setSide] = useState<"pro" | "con" | null>(null);
+    const [side, setSide] = useState<string | null>(null);
     const [content, setContent] = useState("");
     const [imageUrls, setImageUrls] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,7 +40,7 @@ export function ArgumentForm({ debateId, currentUser, onSubmit }: ArgumentFormPr
         }
 
         if (!side) {
-            setError("찬성 또는 반대를 선택해주세요.");
+            setError("입장을 선택해주세요.");
             return;
         }
 
@@ -51,7 +53,7 @@ export function ArgumentForm({ debateId, currentUser, onSubmit }: ArgumentFormPr
                 debate_id: debateId,
                 side,
                 content,
-                image_urls: imageUrls,
+                image_urls: imageUrls.length > 0 ? imageUrls : undefined,
             });
 
             if (response.success) {
@@ -63,45 +65,47 @@ export function ArgumentForm({ debateId, currentUser, onSubmit }: ArgumentFormPr
                 setError(response.error || "제출에 실패했습니다.");
             }
         } catch {
-            setError("오류가 발생했습니다. 다시 시도해주세요.");
+            setError("제출 중 오류가 발생했습니다.");
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
-        <div className="w-full mx-auto">
-            <form onSubmit={handleSubmit} className="space-y-12 p-8 md:p-12 border-[3px] border-foreground bg-background bw-glow">
-                <div className="space-y-2 text-center">
-                    <h2 className="text-3xl font-[900] tracking-tighter uppercase italic">⚔️ 자신의 생각을 공유해주세요</h2>
+        <>
+            <form onSubmit={handleSubmit} className="space-y-8">
+                <div className="text-center space-y-2">
+                    <h2 className="text-3xl font-[900] tracking-tighter uppercase">
+                        ⚔️ Share Your Thoughts in the Arena
+                    </h2>
                     <p className="text-sm opacity-40 font-bold uppercase tracking-widest">Share your thoughts in the Arena</p>
                 </div>
 
-                {/* Side Selection */}
+                {/* Side Selection with Custom Options */}
                 <div className="grid grid-cols-2 gap-4">
                     <button
                         type="button"
-                        onClick={() => setSide("pro")}
+                        onClick={() => setSide(optionA)}
                         className={cn(
                             "py-6 border-[3px] font-black uppercase tracking-tighter transition-all duration-300 transform active:scale-95",
-                            side === "pro"
+                            side === optionA
                                 ? "bg-foreground text-background border-foreground text-2xl"
                                 : "border-foreground/10 hover:border-foreground opacity-30 hover:opacity-100"
                         )}
                     >
-                        찬성 (PRO)
+                        {optionA}
                     </button>
                     <button
                         type="button"
-                        onClick={() => setSide("con")}
+                        onClick={() => setSide(optionB)}
                         className={cn(
                             "py-6 border-[3px] font-black uppercase tracking-tighter transition-all duration-300 transform active:scale-95",
-                            side === "con"
+                            side === optionB
                                 ? "bg-foreground text-background border-foreground text-2xl"
                                 : "border-foreground/10 hover:border-foreground opacity-30 hover:opacity-100"
                         )}
                     >
-                        반대 (CON)
+                        {optionB}
                     </button>
                 </div>
 
@@ -121,57 +125,51 @@ export function ArgumentForm({ debateId, currentUser, onSubmit }: ArgumentFormPr
                             </span>
                         </div>
                     </div>
+
                     <textarea
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
-                        placeholder="당신의 입장과 그 이유를 자유롭게 서술해주세요. 논리적으로 설득력 있는 주장을 환영합니다. (이미지를 붙여넣기 하여 첨부할 수도 있습니다)"
-                        className="w-full p-6 border-[3px] border-foreground bg-transparent resize-none h-64 focus:outline-none focus:ring-4 focus:ring-foreground/5 text-lg font-medium leading-relaxed transition-all placeholder:opacity-20"
-                        required
-                        minLength={50}
+                        placeholder="논리적 근거를 제시하세요. 최소 50자 이상 작성해야 제출할 수 있습니다."
                         maxLength={2000}
+                        rows={8}
+                        className="w-full bg-background border-[3px] border-foreground p-4 font-medium text-foreground placeholder:opacity-30 focus:outline-none focus:border-opacity-70 transition-all resize-none"
                     />
                 </div>
 
-                {/* Error Message */}
+                {/* Error Display */}
                 {error && (
-                    <div className="p-4 bg-foreground text-background font-black uppercase tracking-tighter text-sm text-center animate-bounce">
-                        ⚠️ ERROR: {error}
+                    <div className="border-[3px] border-red-500 bg-red-500/10 p-4 text-red-500 font-bold text-sm">
+                        ⚠️ {error}
                     </div>
                 )}
 
-
+                {/* Success Display */}
+                {result && (
+                    <div className="border-[3px] border-foreground bg-foreground text-background p-6 space-y-2">
+                        <p className="font-black uppercase tracking-widest text-sm">✅ 제출 완료!</p>
+                        {result.feedback && (
+                            <p className="text-sm font-medium opacity-90">{result.feedback}</p>
+                        )}
+                    </div>
+                )}
 
                 {/* Submit Button */}
                 <button
                     type="submit"
-                    disabled={isSubmitting || !side || content.length < 50}
+                    disabled={isSubmitting || content.length < 50}
                     className={cn(
-                        "w-full py-8 font-[900] text-3xl uppercase tracking-tighter border-[3px] border-foreground transition-all duration-300 relative overflow-hidden group",
-                        isSubmitting || !side || content.length < 50
-                            ? "opacity-10 cursor-not-allowed"
-                            : "hover:bg-foreground hover:text-background"
+                        "w-full bg-foreground text-background py-4 px-8",
+                        "font-black uppercase tracking-widest text-sm",
+                        "hover:opacity-80 transition-opacity",
+                        "border-[3px] border-foreground",
+                        "disabled:opacity-20 disabled:cursor-not-allowed"
                     )}
                 >
-                    <span className="relative z-10">
-                        {isSubmitting ? "⏳ Submitting..." : "Submit Argument"}
-                    </span>
-                    {!isSubmitting && side && content.length >= 50 && (
-                        <div className="absolute inset-0 bg-foreground translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                    )}
+                    {isSubmitting ? "제출 중..." : "제출하기"}
                 </button>
-
-                {/* Toxicity Warning */}
-                <p className="text-center text-xs font-medium opacity-40 leading-relaxed">
-                    "논리는 칼보다 강합니다. 단, 혐오와 비방은 기사의 무기가 아닙니다."<br />
-                    부적절한 표현은 제재의 대상이 될 수 있습니다.
-                </p>
-
-                <LoginModal
-                    isOpen={showLoginModal}
-                    onClose={() => setShowLoginModal(false)}
-                    onConfirm={() => router.push("/login")}
-                />
             </form>
-        </div>
+
+            <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+        </>
     );
 }
