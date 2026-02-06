@@ -30,7 +30,11 @@ export async function GET(request: Request) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
 
         if (!error) {
-            return NextResponse.redirect(`${origin}${next}`);
+            // Validate that 'next' is a local path to prevent Open Redirect
+            const isLocalPath = next.startsWith('/') && !next.startsWith('//');
+            const safeRedirect = isLocalPath ? next : '/';
+
+            return NextResponse.redirect(`${origin}${safeRedirect}`);
         }
     }
 

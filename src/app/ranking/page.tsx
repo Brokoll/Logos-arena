@@ -8,6 +8,12 @@ export default async function RankingPage() {
     const supabase = await createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
 
+    let username = undefined;
+    if (user) {
+        const { data: profile } = await supabase.from("profiles").select("username").eq("id", user.id).single();
+        username = profile?.username;
+    }
+
     return (
         <div className="min-h-screen bg-background selection:bg-foreground selection:text-background">
             {/* Header */}
@@ -22,7 +28,7 @@ export default async function RankingPage() {
                             <Link href="/notice" className="hover:line-through cursor-pointer tracking-tighter opacity-40">Notices</Link>
                             <span className="hover:line-through cursor-pointer tracking-tighter">Ranking</span>
                         </div>
-                        <AuthButton user={user} />
+                        <AuthButton user={user} username={username} />
                     </div>
                 </div>
             </header>

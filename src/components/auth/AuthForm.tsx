@@ -1,79 +1,32 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 export function AuthForm() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [isSignUp, setIsSignUp] = useState(false); // Toggle between Login and Sign Up
     const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleGoogleLogin = () => {
         setIsLoading(true);
-        setMessage(null);
-
         const supabase = createClient();
-        let error;
-
-        try {
-            if (isSignUp) {
-                // Sign Up Logic
-                const res = await supabase.auth.signUp({
-                    email,
-                    password,
-                });
-                error = res.error;
-
-                if (!error && res.data.user) {
-                    // Check if session exists (Auto Confirm enabled)
-                    if (res.data.session) {
-                        setMessage({ type: "success", text: "🎉 가입 완료! 프로필 설정으로 이동합니다..." });
-                        window.location.href = "/auth/setup";
-                        return;
-                    } else {
-                        // Email confirm required
-                        setMessage({ type: "success", text: "📧 인증 메일을 보냈습니다! 메일함 확인 후 로그인해주세요." });
-                        setIsLoading(false); // Stop loading to let user see message
-                        return;
-                    }
-                }
-            } else {
-                // Sign In Logic
-                const res = await supabase.auth.signInWithPassword({
-                    email,
-                    password,
-                });
-                error = res.error;
-                if (!error && res.data.user) {
-                    window.location.href = "/";
-                    return;
-                }
-            }
-
-            if (error) {
-                // Translate common errors
-                if (error.message.includes("Invalid login credentials")) {
-                    setMessage({ type: "error", text: "이메일 또는 비밀번호가 틀렸습니다." });
-                } else if (error.message.includes("User already registered")) {
-                    setMessage({ type: "error", text: "이미 가입된 이메일입니다. 로그인해주세요." });
-                } else {
-                    setMessage({ type: "error", text: error.message });
-                }
-            }
-        } catch (err) {
-            setMessage({ type: "error", text: "오류가 발생했습니다." });
-        } finally {
-            setIsLoading(false);
-        }
+        supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+                redirectTo: `${window.location.origin}/auth/callback`,
+                queryParams: {
+                    access_type: 'offline',
+                    prompt: 'consent',
+                },
+            },
+        });
     };
 
     return (
         <div className="w-full max-w-md mx-auto">
-            <form onSubmit={handleSubmit} className="space-y-6 p-8 border-[3px] border-foreground bg-background">
+            <div className="space-y-6 p-8 border-[3px] border-foreground bg-background">
                 <div className="text-center space-y-2">
                     <h2 className="text-2xl font-[900] tracking-tighter uppercase">
                         🔐 ENTER THE ARENA
@@ -87,20 +40,9 @@ export function AuthForm() {
                 <div className="space-y-4">
                     <button
                         type="button"
-                        onClick={() => {
-                            const supabase = createClient();
-                            supabase.auth.signInWithOAuth({
-                                provider: "google",
-                                options: {
-                                    redirectTo: `${window.location.origin}/auth/callback`,
-                                    queryParams: {
-                                        access_type: 'offline',
-                                        prompt: 'consent',
-                                    },
-                                },
-                            });
-                        }}
-                        className="w-full py-4 flex items-center justify-center gap-3 border-[3px] border-foreground hover:bg-foreground hover:text-background transition-all font-black uppercase text-base tracking-wide"
+                        onClick={handleGoogleLogin}
+                        disabled={isLoading}
+                        className="w-full py-4 flex items-center justify-center gap-3 border-[3px] border-foreground hover:bg-foreground hover:text-background transition-all font-black uppercase text-base tracking-wide disabled:opacity-50"
                     >
                         {/* Google Icon SVG */}
                         <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
@@ -114,6 +56,13 @@ export function AuthForm() {
 
                     <p className="text-center text-xs opacity-40 font-medium">
                         (건전한 토론 문화를 위해 구글 로그인만 지원합니다)
+                    </p>
+                    <p className="text-center text-[10px] opacity-30 font-bold uppercase tracking-tighter pt-2">
+                        계속 진행함으로써 로고스 아레나의{" "}
+                        <Link href="/privacy" className="underline hover:text-foreground transition-colors">
+                            개인정보처리방침
+                        </Link>
+                        에 동의하는 것으로 간주됩니다.
                     </p>
                 </div>
 
@@ -129,7 +78,7 @@ export function AuthForm() {
                         {message.text}
                     </div>
                 )}
-            </form>
+            </div>
         </div>
     );
 }

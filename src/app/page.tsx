@@ -8,6 +8,12 @@ export default async function Home() {
   const supabase = await createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  let username = undefined;
+  if (user) {
+    const { data: profile } = await supabase.from("profiles").select("username").eq("id", user.id).single();
+    username = profile?.username;
+  }
+
   const debates = await getDebatesList();
 
   return (
@@ -26,7 +32,7 @@ export default async function Home() {
               <Link href="/notice" className="hover:line-through cursor-pointer tracking-tighter opacity-40">Notices</Link>
               <Link href="/ranking" className="hover:line-through cursor-pointer tracking-tighter opacity-40">Ranking</Link>
             </div>
-            <AuthButton user={user} />
+            <AuthButton user={user} username={username} />
           </div>
         </div>
       </header>

@@ -6,9 +6,10 @@ import type { User } from "@supabase/supabase-js";
 
 interface AuthButtonProps {
     user: User | null;
+    username?: string | null;
 }
 
-export function AuthButton({ user }: AuthButtonProps) {
+export function AuthButton({ user, username }: AuthButtonProps) {
     const router = useRouter();
     const supabase = createClient();
 
@@ -21,7 +22,7 @@ export function AuthButton({ user }: AuthButtonProps) {
         return (
             <div className="flex items-center gap-4">
                 <span className="text-xs font-black uppercase tracking-widest opacity-50 hidden md:block">
-                    {user.email?.split("@")[0]}
+                    {username || user.email?.split("@")[0]}
                 </span>
                 <button
                     onClick={handleSignOut}

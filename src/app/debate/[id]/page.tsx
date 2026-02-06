@@ -48,7 +48,7 @@ export default async function DebatePage({ params }: PageProps) {
                             <Link href="/notice" className="hover:line-through cursor-pointer tracking-tighter opacity-40">Notices</Link>
                             <Link href="/ranking" className="hover:line-through cursor-pointer tracking-tighter opacity-40">Ranking</Link>
                         </div>
-                        <AuthButton user={user} />
+                        <AuthButton user={user} username={userProfile?.username} />
                     </div>
                 </div>
             </header>

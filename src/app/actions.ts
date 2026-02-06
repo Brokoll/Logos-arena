@@ -2,7 +2,7 @@
 
 import { argumentSchema } from "@/lib/schemas";
 
-import { createServerClient, createAdminClient } from "@/lib/supabase";
+import { createServerClient } from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
 import type { Argument, Debate, NewArgument, Profile, Comment, Notice, NoticeComment } from "@/lib/database.types";
 
@@ -19,28 +19,41 @@ interface SubmitResult {
     feedback?: string;
 }
 
-/**
- * 특정 주장에 대한 댓글을 게시하는 서버 액션입니다.
- * @param argumentId 댓글이 달릴 주장의 ID
- * @param content 댓글 내용
- * @param userId 현재 로그인한 사용자 ID (서버에서 다시 검증)
- * @param imageUrls 댓글에 포함될 이미지 URL (현재는 사용 안 함)
- * @returns CommentResult - 성공 여부, 에러 메시지, 생성된 댓글 객체
- */
-// 2. Refactored postComment: Removes userId arg, uses serverClient
-export async function postComment(argumentId: string, content: string, imageUrls: string[] = []): Promise<CommentResult> {
-    console.log("=== postComment Server Action Called ===");
-    console.log("Input - argumentId:", argumentId, "content:", content.substring(0, 50) + "...");
+// --- Helpers ---
 
+async function checkCooldown(table: string, userId: string, cooldownMinutes: number = 1) {
+    const supabase = await createServerClient();
+    const { data } = await supabase
+        .from(table)
+        .select("created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+    if (data) {
+        const lastTime = new Date(data.created_at).getTime();
+        const now = new Date().getTime();
+        const diff = now - lastTime;
+        const cooldownMs = cooldownMinutes * 60 * 1000;
+
+        if (diff < cooldownMs) {
+            return Math.ceil((cooldownMs - diff) / 1000);
+        }
+    }
+    return 0;
+}
+
+// --- Actions ---
+export async function postComment(argumentId: string, content: string, imageUrls: string[] = []): Promise<CommentResult> {
     try {
         const supabase = await createServerClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return { success: false, error: "로그인이 필요합니다." };
 
-        // 1. Check Session (Get user from session)
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
-        if (authError || !user) {
-            console.error("Auth Error (postComment):", authError?.message || "User not authenticated.");
-            return { success: false, error: "로그인이 필요합니다." };
-        }
+        const remaining = await checkCooldown("comments", user.id, 0.5); // 30 sec cooldown
+        if (remaining > 0) return { success: false, error: `⏳ 댓글 작성 쿨타임 중입니다. (${remaining}초 남음)` };
+
 
         // 2. Validate Content
         if (!content || content.trim().length === 0) {
@@ -116,28 +129,13 @@ export async function submitArgument(formData: {
             return { success: false, error: errorMessage };
         }
 
-        // 3. Check Cooldown (Rate Limit: 1 minutes)
-        const { data: lastArg } = await supabase
-            .from("arguments")
-            .select("created_at")
-            .eq("user_id", userId)
-            .order("created_at", { ascending: false })
-            .limit(1)
-            .single();
-
-        if (lastArg) {
-            const lastTime = new Date(lastArg.created_at).getTime();
-            const now = new Date().getTime();
-            const diff = now - lastTime;
-            const cooldownMs = 1 * 60 * 1000; // 1 minute
-
-            if (diff < cooldownMs) {
-                const remainingSec = Math.ceil((cooldownMs - diff) / 1000);
-                return {
-                    success: false,
-                    error: `⏳ 논리 재충전 중입니다. ${remainingSec}초 후에 다시 시도해주세요.`,
-                };
-            }
+        // 3. Check Cooldown
+        const remaining = await checkCooldown("arguments", userId, 1);
+        if (remaining > 0) {
+            return {
+                success: false,
+                error: `⏳ 논리 재충전 중입니다. ${remaining}초 후에 다시 시도해주세요.`,
+            };
         }
 
         // 4. (Removed) AI Analysis - Logic score and toxicity check disabled
@@ -241,24 +239,17 @@ export async function getDebateArguments(debateId: string, currentUserId?: strin
 }
 
 export async function getComments(argumentId: string, currentUserId?: string): Promise<(Comment & { profiles: Profile; is_liked: boolean })[]> {
-    console.log("=== getComments called ===");
-    console.log("argumentId:", argumentId);
-    console.log("currentUserId:", currentUserId);
-
-    // Use Admin Client to bypass RLS for reading comments
-    const adminClient = createAdminClient();
-    const { data, error } = await adminClient
+    const supabase = await createServerClient();
+    const { data, error } = await supabase
         .from("comments")
         .select("*, profiles(*)")
         .eq("argument_id", argumentId)
         .order("created_at", { ascending: true });
 
-    console.log("getComments raw data:", data);
-    console.log("getComments error:", error);
 
     let likedCommentIds = new Set<string>();
     if (currentUserId) {
-        const { data: likes } = await adminClient
+        const { data: likes } = await supabase
             .from("comment_likes")
             .select("comment_id")
             .eq("user_id", currentUserId);
@@ -321,7 +312,7 @@ export async function getRanking(): Promise<Profile[]> {
     const supabase = await createServerClient();
     const { data } = await supabase
         .from("profiles")
-        .select("*")
+        .select("id, username, total_score, argument_count, rank")
         .order("total_score", { ascending: false })
         .limit(100);
 
@@ -350,11 +341,8 @@ interface NoticeCommentResult {
 }
 
 export async function getNoticeComments(noticeId: string, currentUserId?: string): Promise<(NoticeComment & { profiles: Profile; is_liked: boolean })[]> {
-    console.log("=== getNoticeComments called ===");
-
-    // Use Admin Client to bypass RLS
-    const adminClient = createAdminClient();
-    const { data, error } = await adminClient
+    const supabase = await createServerClient();
+    const { data, error } = await supabase
         .from("notice_comments")
         .select("*, profiles(*)")
         .eq("notice_id", noticeId)
@@ -367,7 +355,7 @@ export async function getNoticeComments(noticeId: string, currentUserId?: string
 
     let likedCommentIds = new Set<string>();
     if (currentUserId) {
-        const { data: likes } = await adminClient
+        const { data: likes } = await supabase
             .from("notice_comment_likes")
             .select("comment_id")
             .eq("user_id", currentUserId);
@@ -396,7 +384,11 @@ export async function postNoticeComment(noticeId: string, content: string, image
             return { success: false, error: "로그인 세션이 유효하지 않습니다." };
         }
 
-        if (!content.trim()) return { success: false, error: "내용이 없습니다." };
+        const remaining = await checkCooldown("notice_comments", user.id, 0.5); // 30 sec
+        if (remaining > 0) return { success: false, error: `⏳ 공지 댓글 작성 쿨타임 중입니다. (${remaining}초 남음)` };
+
+        if (!content || !content.trim()) return { success: false, error: "내용이 없습니다." };
+        if (content.trim().length > 500) return { success: false, error: "댓글은 500자를 초과할 수 없습니다." };
 
         // 2. Insert using serverClient (RLS)
         const { data, error } = await supabase.from("notice_comments").insert({
@@ -425,15 +417,12 @@ export async function toggleNoticeLike(noticeId: string): Promise<boolean> {
     if (!user) return false;
     const userId = user.id;
 
-    // Use admin client ONLY for the like check/insert to avoid complex RLS on likes table if needed,
-    // BUT we should iterate to use serverClient with proper RLS for likes too.
-    // For now, consistent with goal: Use simple logic but secure the user ID.
-    // Actually, let's stick to admin client for the like relationship managing to be safe on permission errors,
-    // BUT use RPC for the count update to ensure atomicity.
-    const adminClient = createAdminClient();
+    // Spam protection for likes
+    const remaining = await checkCooldown("notice_likes", userId, 0.1); // 6 sec
+    if (remaining > 0) return false;
 
-    // Check if already liked
-    const { data: existing } = await adminClient
+    // Check if already liked using serverClient
+    const { data: existing } = await supabase
         .from("notice_likes")
         .select("*")
         .eq("notice_id", noticeId)
@@ -441,57 +430,36 @@ export async function toggleNoticeLike(noticeId: string): Promise<boolean> {
         .single();
 
     if (existing) {
-        // Unlike
-        await adminClient.from("notice_likes").delete().eq("notice_id", noticeId).eq("user_id", userId);
-        // Use RPC for atomic decrement
-        await adminClient.rpc('decrement_notice_like_count', { row_id: noticeId });
+        // Unlike using serverClient
+        await supabase.from("notice_likes").delete().eq("notice_id", noticeId).eq("user_id", userId);
+        // Use RPC for atomic decrement (Still via serverClient)
+        await supabase.rpc('decrement_notice_like_count', { row_id: noticeId });
 
         revalidatePath("/notice");
         return false;
     } else {
-        // Like
-        await adminClient.from("notice_likes").insert({ notice_id: noticeId, user_id: userId });
+        // Like using serverClient
+        await supabase.from("notice_likes").insert({ notice_id: noticeId, user_id: userId });
         // Use RPC for atomic increment
-        await adminClient.rpc('increment_notice_like_count', { row_id: noticeId });
+        await supabase.rpc('increment_notice_like_count', { row_id: noticeId });
 
         revalidatePath("/notice");
         return true;
     }
 }
 
-// --- Generic Permission Helper ---
-async function verifyUserOrAdmin(targetUserId: string): Promise<{ authorized: boolean; error?: string }> {
-    const supabase = await createServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) return { authorized: false, error: "로그인이 필요합니다." };
-
-    // Owner check
-    if (user.id === targetUserId) return { authorized: true };
-
-    // Admin check
-    const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single();
-
-    if (profile?.role === "admin") return { authorized: true };
-
-    return { authorized: false, error: "권한이 없습니다." };
-}
 
 // --- Argument Actions ---
 
 export async function deleteArgument(argumentId: string) {
-    const adminClient = createAdminClient();
-    const { data: item } = await adminClient.from("arguments").select("user_id").eq("id", argumentId).single();
-    if (!item) return { success: false, error: "삭제할 항목을 찾을 수 없습니다." };
+    const supabase = await createServerClient();
 
-    const { authorized, error } = await verifyUserOrAdmin(item.user_id);
-    if (!authorized) return { success: false, error };
+    // Authorization check
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "로그인이 필요합니다." };
 
-    const { error: delError } = await adminClient.from("arguments").delete().eq("id", argumentId);
+    // Delete using serverClient (RLS will check if owner or admin)
+    const { error: delError } = await supabase.from("arguments").delete().eq("id", argumentId);
     if (delError) return { success: false, error: delError.message };
 
     revalidatePath("/");
@@ -500,14 +468,17 @@ export async function deleteArgument(argumentId: string) {
 }
 
 export async function updateArgument(argumentId: string, content: string) {
-    const adminClient = createAdminClient();
-    const { data: item } = await adminClient.from("arguments").select("user_id").eq("id", argumentId).single();
-    if (!item) return { success: false, error: "수정할 항목을 찾을 수 없습니다." };
+    const supabase = await createServerClient();
 
-    const { authorized, error } = await verifyUserOrAdmin(item.user_id);
-    if (!authorized) return { success: false, error };
+    // Authorization check
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "로그인이 필요합니다." };
 
-    const { error: updateError } = await adminClient
+    if (!content || content.trim().length < 50) return { success: false, error: "주장은 최소 50자 이상이어야 합니다." };
+    if (content.trim().length > 3000) return { success: false, error: "주장은 3000자를 초과할 수 없습니다." };
+
+    // Update using serverClient (RLS will check permission)
+    const { error: updateError } = await supabase
         .from("arguments")
         .update({ content: content.trim() })
         .eq("id", argumentId);
@@ -522,30 +493,31 @@ export async function updateArgument(argumentId: string, content: string) {
 // --- Comment Actions ---
 
 export async function deleteComment(commentId: string) {
-    const adminClient = createAdminClient();
-    const { data: item } = await adminClient.from("comments").select("user_id, argument_id").eq("id", commentId).single();
-    if (!item) return { success: false, error: "삭제할 항목을 찾을 수 없습니다." };
+    const supabase = await createServerClient();
 
-    const { authorized, error } = await verifyUserOrAdmin(item.user_id);
-    if (!authorized) return { success: false, error };
+    // Authorization check
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "로그인이 필요합니다." };
 
-    const { error: delError } = await adminClient.from("comments").delete().eq("id", commentId);
+    // Delete using serverClient (RLS will check permission)
+    const { error: delError } = await supabase.from("comments").delete().eq("id", commentId);
     if (delError) return { success: false, error: delError.message };
 
-    // Revalidate related paths if possible, though comments are often client-fetched
-    // Optimized revalidation is tricky for comments, client usually handles UI
     return { success: true };
 }
 
 export async function updateComment(commentId: string, content: string) {
-    const adminClient = createAdminClient();
-    const { data: item } = await adminClient.from("comments").select("user_id").eq("id", commentId).single();
-    if (!item) return { success: false, error: "수정할 항목을 찾을 수 없습니다." };
+    const supabase = await createServerClient();
 
-    const { authorized, error } = await verifyUserOrAdmin(item.user_id);
-    if (!authorized) return { success: false, error };
+    // Authorization check
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "로그인이 필요합니다." };
 
-    const { error: updateError } = await adminClient
+    if (!content || !content.trim()) return { success: false, error: "내용이 없습니다." };
+    if (content.trim().length > 500) return { success: false, error: "댓글은 500자를 초과할 수 없습니다." };
+
+    // Update using serverClient (RLS will check permission)
+    const { error: updateError } = await supabase
         .from("comments")
         .update({ content: content.trim() })
         .eq("id", commentId);
@@ -558,14 +530,14 @@ export async function updateComment(commentId: string, content: string) {
 // --- Notice Comment Actions ---
 
 export async function deleteNoticeComment(commentId: string) {
-    const adminClient = createAdminClient();
-    const { data: item } = await adminClient.from("notice_comments").select("user_id").eq("id", commentId).single();
-    if (!item) return { success: false, error: "삭제할 항목을 찾을 수 없습니다." };
+    const supabase = await createServerClient();
 
-    const { authorized, error } = await verifyUserOrAdmin(item.user_id);
-    if (!authorized) return { success: false, error };
+    // Authorization check
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "로그인이 필요합니다." };
 
-    const { error: delError } = await adminClient.from("notice_comments").delete().eq("id", commentId);
+    // Delete using serverClient (RLS will check permission)
+    const { error: delError } = await supabase.from("notice_comments").delete().eq("id", commentId);
     if (delError) return { success: false, error: delError.message };
 
     revalidatePath("/notice");
@@ -573,14 +545,17 @@ export async function deleteNoticeComment(commentId: string) {
 }
 
 export async function updateNoticeComment(commentId: string, content: string) {
-    const adminClient = createAdminClient();
-    const { data: item } = await adminClient.from("notice_comments").select("user_id").eq("id", commentId).single();
-    if (!item) return { success: false, error: "수정할 항목을 찾을 수 없습니다." };
+    const supabase = await createServerClient();
 
-    const { authorized, error } = await verifyUserOrAdmin(item.user_id);
-    if (!authorized) return { success: false, error };
+    // Authorization check
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "로그인이 필요합니다." };
 
-    const { error: updateError } = await adminClient
+    if (!content || !content.trim()) return { success: false, error: "내용이 없습니다." };
+    if (content.trim().length > 500) return { success: false, error: "댓글은 500자를 초과할 수 없습니다." };
+
+    // Update using serverClient (RLS will check permission)
+    const { error: updateError } = await supabase
         .from("notice_comments")
         .update({ content: content.trim() })
         .eq("id", commentId);
@@ -594,16 +569,17 @@ export async function updateNoticeComment(commentId: string, content: string) {
 // --- Notice Actions (Admin Only) ---
 
 export async function deleteNotice(noticeId: string) {
-    // Reuse verifyUserOrAdmin but only allow admin logic? Or simple checkAdmin
     const supabase = await createServerClient();
+
+    // Authorization check (Admin only)
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Unauthorized" };
 
     const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
     if (profile?.role !== 'admin') return { success: false, error: "Unauthorized" };
 
-    const adminClient = createAdminClient();
-    const { error } = await adminClient.from("notices").delete().eq("id", noticeId);
+    // Delete using serverClient (RLS will allow this if the user is truly an admin)
+    const { error } = await supabase.from("notices").delete().eq("id", noticeId);
 
     if (error) return { success: false, error: error.message };
 
