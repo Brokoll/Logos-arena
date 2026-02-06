@@ -23,10 +23,14 @@ export default async function AdminPage() {
     }
 
     // 토론 목록 가져오기
-    const { data: debates } = await supabase
+    const { data: debates, error: debatesError } = await supabase
         .from("debates")
         .select("id, topic, option_a, option_b, status, created_at")
         .order("created_at", { ascending: false });
+
+    if (debatesError) {
+        console.error("Debates fetch error:", debatesError);
+    }
 
     return (
         <div className="min-h-screen bg-background text-foreground p-8 md:p-24">

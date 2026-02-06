@@ -89,7 +89,7 @@ export function ArenaClient({
                         {proArguments.length + conArguments.length} arguments submitted
                     </p>
                 </div>
-                <ArenaFeed proArguments={proArguments} conArguments={conArguments} userProfile={userProfile} />
+                <ArenaFeed proArguments={proArguments} conArguments={conArguments} userProfile={userProfile} optionA={optionA} optionB={optionB} />
             </section>
         </div>
     );
