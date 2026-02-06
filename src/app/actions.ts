@@ -1,7 +1,7 @@
 "use server";
 
 import { argumentSchema } from "@/lib/schemas";
-import { analyzeArgument } from "@/lib/debate-logic";
+
 import { createServerClient, createAdminClient } from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
 import type { Argument, Debate, NewArgument, Profile, Comment, Notice, NoticeComment } from "@/lib/database.types";
@@ -140,16 +140,9 @@ export async function submitArgument(formData: {
             }
         }
 
-        // 4. Call AI for analysis (logic score + toxicity check)
-        const aiResult = await analyzeArgument(formData.content);
+        // 4. (Removed) AI Analysis - Logic score and toxicity check disabled
 
-        // 5. Check toxicity
-        if (aiResult.isToxic) {
-            return {
-                success: false,
-                error: "부적절한 내용이 감지되었습니다. 건전한 토론 문화를 위해 내용을 수정해주세요.",
-            };
-        }
+        // 5. (Removed) Toxicity check disabled
 
         // 6. Save to Supabase (use server client, RLS enabled)
         const insertData: NewArgument = {
@@ -159,7 +152,7 @@ export async function submitArgument(formData: {
             content: formData.content,
             image_urls: formData.image_urls || [],
             score: null,
-            feedback: aiResult.feedback,
+            feedback: null, // AI feedback disabled
         };
 
         const { error: dbError } = await supabase.from("arguments").insert(insertData);
@@ -178,7 +171,7 @@ export async function submitArgument(formData: {
         return {
             success: true,
             score: undefined,
-            feedback: aiResult.feedback,
+            feedback: undefined,
         };
     } catch (error) {
         console.error("Submit error:", error);

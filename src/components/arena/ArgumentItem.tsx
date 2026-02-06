@@ -237,11 +237,7 @@ export function ArgumentItem({ argument, currentUser, userProfile }: ArgumentIte
                 </div>
             </div>
 
-            {argument.feedback && !isEditingArgument && (
-                <p className="text-xs opacity-50 font-mono border-l-2 border-foreground/20 pl-3">
-                    🤖 Analysis: {argument.feedback}
-                </p>
-            )}
+
 
             {/* Action Bar */}
             <div className="pt-6 border-t border-foreground/5 flex items-center justify-between gap-4">
