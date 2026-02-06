@@ -5,21 +5,11 @@
 @tailwind utilities;
 
 :root {
-  /* Warm Off-White / Stone-50 background for less eye strain */
-  --background: #FAFAF9;
-  /* Soft Charcoal / Stone-900 for text */
-  --foreground: #1C1917;
-  --accent: #E7E5E4;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Soft Black / Stone-950 */
-    --background: #0C0A09;
-    /* Warm Light Gray / Stone-100 */
-    --foreground: #F5F5F4;
-    --accent: #292524;
-  }
+  /* Soft Black / Stone-950 (Force Dark Mode) */
+  --background: #0C0A09;
+  /* Warm Light Gray / Stone-100 */
+  --foreground: #F5F5F4;
+  --accent: #292524;
 }
 
 body {
