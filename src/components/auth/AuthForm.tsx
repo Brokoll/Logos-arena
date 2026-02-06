@@ -76,8 +76,7 @@ export function AuthForm() {
             <form onSubmit={handleSubmit} className="space-y-6 p-8 border-[3px] border-foreground bg-background">
                 <div className="text-center space-y-2">
                     <h2 className="text-2xl font-[900] tracking-tighter uppercase">
-                        {isSignUp ? "📝 Join the Arena" : "🔐 Enter the Arena"}
-                        🔐 Enter the Arena
+                        🔐 ENTER THE ARENA
                     </h2>
                     <p className="text-sm opacity-50">
                         로그인하여 논쟁에 참여하세요
