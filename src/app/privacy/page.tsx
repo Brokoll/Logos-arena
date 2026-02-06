@@ -52,7 +52,7 @@ export default function PrivacyPage() {
                                     </tr>
                                     <tr className="border-b-[2px] border-foreground">
                                         <td className="p-4 border-r border-foreground font-bold">서비스 이용 시</td>
-                                        <td className="p-4 border-r border-foreground text-center font-black text-[10px] uppercase opacity-50">자동</td>
+                                        <td className="p-4 border-r border-foreground text-center font-black text-[10px] uppercase">자동</td>
                                         <td className="p-4 border-r border-foreground">토론 주장 및 댓글 작성 내역, 투표/좋아요 기록, 활동 점수 및 랭킹 데이터, IP 주소, 기기 정보(OS, 브라우저), 접속 기록, 쿠키</td>
                                         <td className="p-4">토론 서비스 제공, 부정 이용 방지, 서비스 개선 및 분석</td>
                                     </tr>
@@ -64,7 +64,7 @@ export default function PrivacyPage() {
                                     </tr>
                                     <tr>
                                         <td className="p-4 border-r border-foreground font-bold">고객 문의 시</td>
-                                        <td className="p-4 border-r border-foreground text-center font-black text-[10px] uppercase opacity-50">선택</td>
+                                        <td className="p-4 border-r border-foreground text-center font-black text-[10px] uppercase">선택</td>
                                         <td className="p-4 border-r border-foreground">이메일 주소, 문의 내용 및 첨부 파일</td>
                                         <td className="p-4">문의 사항 확인 및 답변 안내</td>
                                     </tr>
