@@ -49,6 +49,7 @@ ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
 -- Debates: Public Read, Service Role Write (Use Dashboard for inserts)
 CREATE POLICY "Public Read Debates" ON debates FOR SELECT USING (true);
+CREATE POLICY "Authenticated Insert Debates" ON debates FOR INSERT TO authenticated WITH CHECK (true);
 
 -- Arguments: Public Read, Auth User Write
 CREATE POLICY "Public Read Arguments" ON arguments FOR SELECT USING (true);
