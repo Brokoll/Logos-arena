@@ -62,6 +62,10 @@ export function AuthForm() {
                         <Link href="/privacy" className="underline hover:text-foreground transition-colors">
                             개인정보처리방침
                         </Link>
+                        {" "}및{" "}
+                        <Link href="/terms" className="underline hover:text-foreground transition-colors">
+                            이용약관
+                        </Link>
                         에 동의하는 것으로 간주됩니다.
                     </p>
                 </div>

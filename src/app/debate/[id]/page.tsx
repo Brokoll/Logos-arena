@@ -98,9 +98,22 @@ export default async function DebatePage({ params }: PageProps) {
 
             {/* Footer */}
             <footer className="border-t-[3px] border-foreground mt-32 py-12">
-                <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
-                    <p className="font-black tracking-tighter">LOGOS ARENA © 2026</p>
-                    <p className="text-sm font-bold opacity-40 uppercase tracking-widest italic">Logic is the only weapon.</p>
+                <div className="max-w-7xl mx-auto px-6 space-y-6">
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+                        <p className="font-black tracking-tighter">LOGOS ARENA © 2026</p>
+                        <p className="text-sm font-bold opacity-40 uppercase tracking-widest italic">Logic is the only weapon.</p>
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-4 text-xs font-bold uppercase tracking-wider opacity-60">
+                        <Link href="/privacy" className="hover:opacity-100 transition-opacity">개인정보처리방침</Link>
+                        <span>|</span>
+                        <Link href="/terms" className="hover:opacity-100 transition-opacity">이용약관</Link>
+                        <span>|</span>
+                        <Link href="/business-info" className="hover:opacity-100 transition-opacity">사업자 정보</Link>
+                        <span>|</span>
+                        <Link href="/youth-protection" className="hover:opacity-100 transition-opacity">청소년 보호정책</Link>
+                        <span>|</span>
+                        <Link href="/copyright" className="hover:opacity-100 transition-opacity">저작권 안내</Link>
+                    </div>
                 </div>
             </footer>
         </div>
