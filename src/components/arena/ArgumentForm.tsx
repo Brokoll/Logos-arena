@@ -124,7 +124,7 @@ export function ArgumentForm({ debateId, currentUser, onSubmit }: ArgumentFormPr
                     <textarea
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
-                        placeholder="당신의 입장과 그 이유를 자유롭게 서술해주세요. 논리적 완성도가 높을수록 AI 심판의 점수가 올라갑니다. (이미지를 붙여넣기 하여 첨부할 수도 있습니다)"
+                        placeholder="당신의 입장과 그 이유를 자유롭게 서술해주세요. 논리적으로 설득력 있는 주장을 환영합니다. (이미지를 붙여넣기 하여 첨부할 수도 있습니다)"
                         className="w-full p-6 border-[3px] border-foreground bg-transparent resize-none h-64 focus:outline-none focus:ring-4 focus:ring-foreground/5 text-lg font-medium leading-relaxed transition-all placeholder:opacity-20"
                         required
                         minLength={50}
@@ -139,17 +139,7 @@ export function ArgumentForm({ debateId, currentUser, onSubmit }: ArgumentFormPr
                     </div>
                 )}
 
-                {/* Result */}
-                {result && (
-                    <div className="p-8 border-[3px] border-foreground bg-foreground text-background text-center space-y-4 animate-in zoom-in duration-500">
-                        <p className="text-xs font-black uppercase tracking-[0.4em]">Battle Analysis</p>
-                        {result.feedback && (
-                            <p className="text-lg font-medium italic opacity-80 max-w-lg mx-auto leading-tight">
-                                " {result.feedback} "
-                            </p>
-                        )}
-                    </div>
-                )}
+
 
                 {/* Submit Button */}
                 <button
@@ -163,7 +153,7 @@ export function ArgumentForm({ debateId, currentUser, onSubmit }: ArgumentFormPr
                     )}
                 >
                     <span className="relative z-10">
-                        {isSubmitting ? "⏳ Analyzing Logic..." : "Submit Argument"}
+                        {isSubmitting ? "⏳ Submitting..." : "Submit Argument"}
                     </span>
                     {!isSubmitting && side && content.length >= 50 && (
                         <div className="absolute inset-0 bg-foreground translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
