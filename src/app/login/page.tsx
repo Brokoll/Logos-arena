@@ -12,9 +12,6 @@ export default function LoginPage() {
                     <p className="mt-2 opacity-50 text-sm uppercase tracking-widest">Logic is the only weapon</p>
                 </div>
                 <AuthForm />
-                <p className="text-center text-xs opacity-30">
-                    이메일로 Magic Link가 전송됩니다. 비밀번호 필요 없음!
-                </p>
             </div>
         </div>
     );
