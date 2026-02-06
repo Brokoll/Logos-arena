@@ -81,11 +81,11 @@ export async function createDebate(prevState: any, formData: FormData) {
 
     if (error) {
         console.error("Debate create error:", error);
-        return { error: "토론 주제 생성 실패" };
+        return { error: "토론 주제 생성 실패", success: false };
     }
 
     revalidatePath("/");
-    redirect("/");
+    return { error: "", success: true };
 }
 
 export async function deleteArgument(argumentId: string) {

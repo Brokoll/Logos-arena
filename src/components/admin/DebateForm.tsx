@@ -3,11 +3,21 @@
 import { useFormState } from "react-dom";
 import { createDebate } from "@/app/admin/actions";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
-const initialState = { error: "" };
+const initialState = { error: "", success: false };
 
 export function DebateForm() {
     const [state, formAction] = useFormState(createDebate, initialState);
+    const [showSuccess, setShowSuccess] = useState(false);
+
+    useEffect(() => {
+        if (state?.success) {
+            setShowSuccess(true);
+            const timer = setTimeout(() => setShowSuccess(false), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [state?.success]);
 
     return (
         <form action={formAction} className="space-y-8">
@@ -44,6 +54,12 @@ export function DebateForm() {
             {state?.error && (
                 <div className="border-[3px] border-red-500 bg-red-500/10 p-4 text-red-500 font-bold text-sm">
                     ⚠️ {state.error}
+                </div>
+            )}
+
+            {showSuccess && (
+                <div className="border-[3px] border-green-500 bg-green-500/10 p-4 text-green-500 font-bold text-sm animate-pulse">
+                    ✅ 토론 주제가 성공적으로 생성되었습니다!
                 </div>
             )}
 
