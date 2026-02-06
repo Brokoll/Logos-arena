@@ -11,10 +11,10 @@ export default function PrivacyPage() {
                     </Link>
                     <h1 className="text-5xl md:text-7xl font-[900] tracking-tighter uppercase leading-none">
                         Privacy Policy<br />
-                        <span className="text-2xl md:text-3xl opacity-50 font-black">개인정보처리방침 (초안)</span>
+                        <span className="text-2xl md:text-3xl font-black">개인정보처리방침 (초안)</span>
                     </h1>
-                    <p className="mt-4 text-sm font-medium opacity-50 uppercase tracking-widest">
-                        공고일자: 2025-09-30 · 시행일자: 2025-09-30
+                    <p className="mt-4 text-sm font-medium uppercase tracking-widest">
+                        공고일자: 2026-02-07 · 시행일자: 2026-02-07
                     </p>
                 </div>
 
@@ -73,15 +73,15 @@ export default function PrivacyPage() {
                         </div>
                     </section>
 
-                    <section className="space-y-4 text-sm opacity-80 font-medium">
-                        <p className="font-black text-base opacity-100">② 수집 방법</p>
+                    <section className="space-y-4 text-sm font-medium">
+                        <p className="font-black text-base">② 수집 방법</p>
                         <p>- 회원가입 및 서비스 이용 과정에서 이용자가 개인정보 수집에 대해 동의를 하고 직접 정보를 입력하는 경우</p>
                     </section>
                 </div>
 
                 {/* Footer */}
-                <div className="pt-12 border-t-[4px] border-foreground opacity-30 text-xs font-black uppercase tracking-widest text-center">
-                    &copy; 2025 LOGOS ARENA. ALL RIGHTS RESERVED.
+                <div className="pt-12 border-t-[4px] border-foreground text-xs font-black uppercase tracking-widest text-center">
+                    &copy; 2026 LOGOS ARENA. ALL RIGHTS RESERVED.
                 </div>
             </div>
         </div>
