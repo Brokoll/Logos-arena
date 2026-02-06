@@ -1,27 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Merriweather:wght@300;400;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Warm Off-White / Stone-50 background for less eye strain */
+  --background: #FAFAF9;
+  /* Soft Charcoal / Stone-900 for text */
+  --foreground: #1C1917;
+  --accent: #E7E5E4;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Soft Black / Stone-950 */
+    --background: #0C0A09;
+    /* Warm Light Gray / Stone-100 */
+    --foreground: #F5F5F4;
+    --accent: #292524;
   }
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+/* Premium B&W Glow effect */
+.bw-glow {
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+}
+
+.dark .bw-glow {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.02);
 }

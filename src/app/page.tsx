@@ -1,100 +1,105 @@
-import Image from "next/image";
+import { createServerClient } from "@/lib/supabase";
+import { getDebatesList } from "./actions";
+import { AuthButton } from "@/components/auth";
+import { RotatingText } from "@/components/ui/RotatingText";
+import Link from "next/link";
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const debates = await getDebatesList();
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-background selection:bg-foreground selection:text-background">
+      {/* Header */}
+      <header className="border-b-[3px] border-foreground sticky top-0 bg-background/80 backdrop-blur-md z-50">
+        <div className="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
+          <Link href="/" className="hover:opacity-60 transition-opacity">
+            <h1 className="text-3xl font-[900] tracking-tighter cursor-pointer">
+              ⚔️ LOGOS ARENA
+            </h1>
+          </Link>
+          <div className="flex items-center gap-6">
+            <div className="hidden md:flex gap-6 text-sm font-bold uppercase tracking-widest">
+              <span className="hover:line-through cursor-pointer tracking-tighter opacity-100">Lobby</span>
+              <Link href="/notice" className="hover:line-through cursor-pointer tracking-tighter opacity-40">Notices</Link>
+              <Link href="/ranking" className="hover:line-through cursor-pointer tracking-tighter opacity-40">Ranking</Link>
+            </div>
+            <AuthButton user={user} />
+          </div>
         </div>
+      </header>
+
+      {/* Main Content: Dashboard */}
+      <main className="max-w-7xl mx-auto px-6 py-16 space-y-16">
+
+        {/* Intro */}
+        <section className="text-center space-y-6 py-12">
+          <h2 className="text-5xl md:text-8xl font-[900] tracking-tighter uppercase leading-[0.9]">
+            Choose Your<br />Arena
+          </h2>
+          <RotatingText />
+        </section>
+
+        {/* Debate Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {debates.map((debate) => (
+            <Link
+              key={debate.id}
+              href={`/debate/${debate.id}`}
+              className="group relative block h-full"
+            >
+              <div className="h-full border-[3px] border-foreground bg-background p-8 flex flex-col justify-between transition-all duration-300 hover:-translate-y-2 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                <div className="space-y-6">
+                  <div className="flex justify-between items-start">
+                    <span className="inline-block px-3 py-1 border-2 border-foreground text-[10px] font-black uppercase tracking-widest bg-foreground text-background">
+                      Active
+                    </span>
+                    <span className="text-xs font-bold opacity-40">
+                      {new Date(debate.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  <h3 className="text-2xl font-[900] tracking-tighter leading-tight group-hover:underline decoration-4 underline-offset-4">
+                    {debate.topic}
+                  </h3>
+
+                  {debate.description && (
+                    <p className="text-sm font-medium opacity-60 line-clamp-3 leading-relaxed">
+                      {debate.description}
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-8 pt-6 border-t-2 border-foreground/10 flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">💬</span>
+                    <span className="font-black text-lg">{debate.argument_count}</span>
+                  </div>
+                  <span className="font-bold text-sm uppercase tracking-wider group-hover:translate-x-1 transition-transform">
+                    참여하기 →
+                  </span>
+                </div>
+              </div>
+            </Link>
+          ))}
+
+          {debates.length === 0 && (
+            <div className="col-span-full h-64 flex flex-col items-center justify-center text-center opacity-40 border-[3px] border-dashed border-foreground">
+              <p className="text-xl font-bold">진행 중인 토론이 없습니다.</p>
+            </div>
+          )}
+        </div>
+
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+      {/* Footer */}
+      <footer className="border-t-[3px] border-foreground mt-32 py-12">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+          <p className="font-black tracking-tighter">LOGOS ARENA © 2026</p>
+          <p className="text-sm font-bold opacity-40 uppercase tracking-widest italic">Logic is the only weapon.</p>
+        </div>
       </footer>
     </div>
   );
