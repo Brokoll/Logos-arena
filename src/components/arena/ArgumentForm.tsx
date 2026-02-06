@@ -73,8 +73,8 @@ export function ArgumentForm({ debateId, currentUser, onSubmit }: ArgumentFormPr
         <div className="w-full mx-auto">
             <form onSubmit={handleSubmit} className="space-y-12 p-8 md:p-12 border-[3px] border-foreground bg-background bw-glow">
                 <div className="space-y-2 text-center">
-                    <h2 className="text-3xl font-[900] tracking-tighter uppercase italic">⚔️ 논리가 당신의 무기가 됩니다</h2>
-                    <p className="text-sm opacity-40 font-bold uppercase tracking-widest">Enter the Arena with your logic</p>
+                    <h2 className="text-3xl font-[900] tracking-tighter uppercase italic">⚔️ 여기에 자신의 생각을 공유해주세요</h2>
+                    <p className="text-sm opacity-40 font-bold uppercase tracking-widest">Share your thoughts in the Arena</p>
                 </div>
 
                 {/* Side Selection */}
