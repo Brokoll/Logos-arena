@@ -14,6 +14,8 @@ export interface Database {
                     id: string
                     topic: string
                     description: string | null
+                    option_a: string
+                    option_b: string
                     status: 'active' | 'closed'
                     created_at: string
                 }
@@ -21,6 +23,8 @@ export interface Database {
                     id?: string
                     topic: string
                     description?: string | null
+                    option_a?: string
+                    option_b?: string
                     status?: 'active' | 'closed'
                     created_at?: string
                 }
@@ -28,6 +32,8 @@ export interface Database {
                     id?: string
                     topic?: string
                     description?: string | null
+                    option_a?: string
+                    option_b?: string
                     status?: 'active' | 'closed'
                     created_at?: string
                 }

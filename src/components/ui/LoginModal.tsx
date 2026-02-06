@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 interface LoginModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: () => void;
+    onConfirm?: () => void;
 }
 
 export function LoginModal({ isOpen, onClose, onConfirm }: LoginModalProps) {

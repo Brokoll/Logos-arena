@@ -124,3 +124,20 @@ export async function deleteComment(commentId: string) {
     revalidatePath(`/debate/[id]`); // Best guess revalidation
     return { success: true };
 }
+
+export async function deleteDebate(debateId: string) {
+    const isAdmin = await checkAdmin();
+    if (!isAdmin) return { success: false, error: "Unauthorized" };
+
+    const supabase = await createServerClient();
+    const { error } = await supabase.from("debates").delete().eq("id", debateId);
+
+    if (error) {
+        console.error("Delete debate error:", error);
+        return { success: false, error: "토론 삭제 실패" };
+    }
+
+    revalidatePath("/");
+    revalidatePath("/admin");
+    return { success: true };
+}

@@ -1,6 +1,7 @@
 import { createServerClient } from "@/lib/supabase";
 import { redirect } from "next/navigation";
 import { DebateForm } from "@/components/admin/DebateForm";
+import { DebateList } from "@/components/admin/DebateList";
 import Link from "next/link";
 
 export default async function AdminPage() {
@@ -20,6 +21,12 @@ export default async function AdminPage() {
     if (profile?.role !== "admin") {
         redirect("/");
     }
+
+    // 토론 목록 가져오기
+    const { data: debates } = await supabase
+        .from("debates")
+        .select("id, topic, option_a, option_b, status, created_at")
+        .order("created_at", { ascending: false });
 
     return (
         <div className="min-h-screen bg-background text-foreground p-8 md:p-24">
@@ -54,11 +61,25 @@ export default async function AdminPage() {
                     </div>
                 </section>
 
-                {/* Info Section */}
+                {/* Debate Management Section */}
+                <section className="space-y-6">
+                    <div className="border-l-8 border-foreground pl-4">
+                        <h2 className="text-2xl font-black uppercase tracking-tight">
+                            토론 관리
+                        </h2>
+                        <p className="text-sm font-medium opacity-60 mt-2">
+                            기존 토론을 확인하고 삭제할 수 있습니다.
+                        </p>
+                    </div>
+
+                    <DebateList debates={debates || []} />
+                </section>
+
+                {/* Quick Links */}
                 <section className="space-y-4">
                     <div className="border-l-8 border-foreground pl-4">
                         <h2 className="text-2xl font-black uppercase tracking-tight">
-                            관리 기능
+                            빠른 링크
                         </h2>
                     </div>
 
@@ -73,12 +94,15 @@ export default async function AdminPage() {
                             </p>
                         </Link>
 
-                        <div className="border-[3px] border-foreground p-6 opacity-40">
-                            <h3 className="font-black uppercase tracking-wider mb-2">토론 관리</h3>
-                            <p className="text-sm font-medium">
-                                기존 토론 수정/삭제 (준비 중)
+                        <Link
+                            href="/"
+                            className="border-[3px] border-foreground p-6 hover:bg-foreground hover:text-background transition-all group"
+                        >
+                            <h3 className="font-black uppercase tracking-wider mb-2">아레나 보기</h3>
+                            <p className="text-sm font-medium opacity-60 group-hover:opacity-100">
+                                메인 토론 페이지로 이동
                             </p>
-                        </div>
+                        </Link>
                     </div>
                 </section>
 
