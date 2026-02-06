@@ -11,7 +11,7 @@ export default function PrivacyPage() {
                     </Link>
                     <h1 className="text-5xl md:text-7xl font-[900] tracking-tighter uppercase leading-none">
                         Privacy Policy<br />
-                        <span className="text-2xl md:text-3xl font-black">개인정보처리방침 (초안)</span>
+                        <span className="text-2xl md:text-3xl font-black">개인정보처리방침</span>
                     </h1>
                     <p className="mt-4 text-sm font-medium uppercase tracking-widest">
                         공고일자: 2026-02-07 · 시행일자: 2026-02-07
