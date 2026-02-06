@@ -112,25 +112,7 @@ export function AuthForm() {
                         Continue with Google
                     </button>
 
-                    <button
-                        type="button"
-                        onClick={() => {
-                            const supabase = createClient();
-                            supabase.auth.signInWithOAuth({
-                                provider: "kakao",
-                                options: {
-                                    redirectTo: `${window.location.origin}/auth/callback`,
-                                },
-                            });
-                        }}
-                        className="w-full py-3 flex items-center justify-center gap-2 bg-[#FEE500] text-[#191919] border-[3px] border-[#FEE500] hover:opacity-80 transition-opacity font-bold uppercase text-sm"
-                    >
-                        {/* Kakao Icon SVG */}
-                        <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                            <path d="M12 3C5.925 3 1 6.925 1 11.775c0 3.12 2.05 5.86 5.175 7.425-.225.825-.825 3.025-.95 3.475-.15.55.2.55.425.4l2.85-1.925c.3.025.6.05.9.05 6.075 0 11-3.925 11-8.775S16.075 3 12 3z" />
-                        </svg>
-                        Continue with Kakao
-                    </button>
+
                 </div>
 
                 <div className="relative">
