@@ -37,7 +37,7 @@ export function ArenaClient({
 
         const result = await submitArgument({
             ...data,
-            user_id: user.id,
+            // user_id is now handled on server side
         });
 
         if (result.success) {
@@ -53,6 +53,7 @@ export function ArenaClient({
                 created_at: new Date().toISOString(),
                 profiles: null,
                 is_liked: false,
+                comment_count: 0,
                 image_urls: data.image_urls || []
             };
 

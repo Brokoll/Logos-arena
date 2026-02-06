@@ -89,7 +89,7 @@ export function NoticeItem({ notice, currentUser, userProfile }: NoticeItemProps
 
         try {
             setIsPosting(true);
-            const result = await postNoticeComment(notice.id, newComment, currentUser.id, newCommentImageUrls);
+            const result = await postNoticeComment(notice.id, newComment, newCommentImageUrls);
 
             if (result.success && result.comment) {
                 const newCommentObj: NoticeComment & { profiles: Profile | null; is_liked: boolean } = {

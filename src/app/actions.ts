@@ -27,31 +27,30 @@ interface SubmitResult {
  * @param imageUrls 댓글에 포함될 이미지 URL (현재는 사용 안 함)
  * @returns CommentResult - 성공 여부, 에러 메시지, 생성된 댓글 객체
  */
-export async function postComment(argumentId: string, content: string, userId: string, imageUrls: string[] = []): Promise<CommentResult> {
+// 2. Refactored postComment: Removes userId arg, uses serverClient
+export async function postComment(argumentId: string, content: string, imageUrls: string[] = []): Promise<CommentResult> {
     console.log("=== postComment Server Action Called ===");
-    console.log("Input - argumentId:", argumentId, "content:", content.substring(0, 50) + "...", "userId:", userId);
+    console.log("Input - argumentId:", argumentId, "content:", content.substring(0, 50) + "...");
 
     try {
         const supabase = await createServerClient();
 
-        // 1. Check Session (Double-check user ID for security)
+        // 1. Check Session (Get user from session)
         const { data: { user }, error: authError } = await supabase.auth.getUser();
-        if (authError || !user || user.id !== userId) {
-            console.error("Auth Error (postComment):", authError?.message || "User not authenticated or ID mismatch.");
-            return { success: false, error: "로그인 세션이 유효하지 않거나 일치하지 않습니다." };
+        if (authError || !user) {
+            console.error("Auth Error (postComment):", authError?.message || "User not authenticated.");
+            return { success: false, error: "로그인이 필요합니다." };
         }
 
         // 2. Validate Content
         if (!content || content.trim().length === 0) {
-            console.warn("Validation Warning (postComment): Content is empty.");
             return { success: false, error: "댓글 내용을 입력해주세요." };
         }
-        if (content.trim().length > 500) { // Max length from schema_comments.sql
-            console.warn("Validation Warning (postComment): Content too long.");
+        if (content.trim().length > 500) {
             return { success: false, error: "댓글 내용은 500자를 초과할 수 없습니다." };
         }
 
-        // 3. Verify argumentId exists and get debateId for revalidation
+        // 3. Verify argumentId exists
         const { data: argumentData, error: argumentError } = await supabase
             .from("arguments")
             .select("debate_id")
@@ -59,16 +58,14 @@ export async function postComment(argumentId: string, content: string, userId: s
             .single();
 
         if (argumentError || !argumentData) {
-            console.error("Argument Fetch Error (postComment):", argumentError?.message || "Argument not found.");
             return { success: false, error: "유효하지 않은 주장에 댓글을 달 수 없습니다." };
         }
         const debateId = argumentData.debate_id;
 
-        // 4. Insert Comment using Admin Client (RLS bypass)
-        const adminClient = createAdminClient();
-        const { data: newComment, error: insertError } = await adminClient.from("comments").insert({
+        // 4. Insert Comment using Server Client (Respects RLS)
+        const { data: newComment, error: insertError } = await supabase.from("comments").insert({
             argument_id: argumentId,
-            user_id: user.id,
+            user_id: user.id, // Set from session
             content: content.trim(),
             image_urls: imageUrls
         }).select().single();
@@ -80,7 +77,6 @@ export async function postComment(argumentId: string, content: string, userId: s
 
         console.log("Comment Inserted Successfully:", newComment);
 
-        // 5. Revalidate path for the specific debate page to show new comment
         revalidatePath(`/debate/${debateId}`); // Revalidate the specific debate page
 
         return { success: true, comment: newComment as Comment };
@@ -90,15 +86,25 @@ export async function postComment(argumentId: string, content: string, userId: s
     }
 }
 
+// 2. Refactored submitArgument: Removes userId arg, uses serverClient
 export async function submitArgument(formData: {
     debate_id: string;
     side: "pro" | "con";
     content: string;
     image_urls?: string[];
-    user_id: string;
+    // user_id removed from input
 }): Promise<SubmitResult> {
     try {
-        // 1. Validate with Zod
+        const supabase = await createServerClient();
+
+        // 1. Get User from Session (Secure)
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError || !user) {
+            return { success: false, error: "로그인이 필요합니다." };
+        }
+        const userId = user.id;
+
+        // 2. Validate with Zod
         const validationResult = argumentSchema.safeParse({
             debate_id: formData.debate_id,
             side: formData.side,
@@ -107,18 +113,14 @@ export async function submitArgument(formData: {
         if (!validationResult.success) {
             const firstIssue = validationResult.error.issues[0];
             const errorMessage = firstIssue ? firstIssue.message : "유효하지 않은 입력입니다.";
-            return {
-                success: false,
-                error: errorMessage,
-            };
+            return { success: false, error: errorMessage };
         }
 
-        // 2. Check Cooldown (Rate Limit: 3 minutes)
-        const supabase = await createServerClient();
+        // 3. Check Cooldown (Rate Limit: 1 minutes)
         const { data: lastArg } = await supabase
             .from("arguments")
             .select("created_at")
-            .eq("user_id", formData.user_id)
+            .eq("user_id", userId)
             .order("created_at", { ascending: false })
             .limit(1)
             .single();
@@ -138,10 +140,10 @@ export async function submitArgument(formData: {
             }
         }
 
-        // 3. Call AI for analysis (logic score + toxicity check)
+        // 4. Call AI for analysis (logic score + toxicity check)
         const aiResult = await analyzeArgument(formData.content);
 
-        // 4. Check toxicity
+        // 5. Check toxicity
         if (aiResult.isToxic) {
             return {
                 success: false,
@@ -149,15 +151,14 @@ export async function submitArgument(formData: {
             };
         }
 
-        // 5. Save to Supabase (use server client)
-        // const supabase = await createServerClient(); // Already created above
+        // 6. Save to Supabase (use server client, RLS enabled)
         const insertData: NewArgument = {
             debate_id: formData.debate_id,
-            user_id: formData.user_id,
+            user_id: userId, // From session
             side: formData.side,
             content: formData.content,
             image_urls: formData.image_urls || [],
-            score: null, // Score is removed, set to null
+            score: null,
             feedback: aiResult.feedback,
         };
 
@@ -171,12 +172,12 @@ export async function submitArgument(formData: {
             };
         }
 
-        // 6. Revalidate the page
+        // 7. Revalidate the page
         revalidatePath("/");
 
         return {
             success: true,
-            score: undefined, // No score returned
+            score: undefined,
             feedback: aiResult.feedback,
         };
     } catch (error) {
@@ -390,21 +391,24 @@ export async function getNoticeComments(noticeId: string, currentUserId?: string
     })) as (NoticeComment & { profiles: Profile; is_liked: boolean })[];
 }
 
-export async function postNoticeComment(noticeId: string, content: string, userId: string, imageUrls: string[] = []): Promise<NoticeCommentResult> {
+// Refactored postNoticeComment: Removes userId arg, uses serverClient
+export async function postNoticeComment(noticeId: string, content: string, imageUrls: string[] = []): Promise<NoticeCommentResult> {
     try {
         const supabase = await createServerClient();
+
+        // 1. Get User
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-        if (authError || !user || user.id !== userId) {
+        if (authError || !user) {
             return { success: false, error: "로그인 세션이 유효하지 않습니다." };
         }
 
         if (!content.trim()) return { success: false, error: "내용이 없습니다." };
 
-        const adminClient = createAdminClient();
-        const { data, error } = await adminClient.from("notice_comments").insert({
+        // 2. Insert using serverClient (RLS)
+        const { data, error } = await supabase.from("notice_comments").insert({
             notice_id: noticeId,
-            user_id: user.id,
+            user_id: user.id, // From session
             content: content.trim(),
             image_urls: imageUrls
         }).select().single();
@@ -419,7 +423,20 @@ export async function postNoticeComment(noticeId: string, content: string, userI
     }
 }
 
-export async function toggleNoticeLike(noticeId: string, userId: string): Promise<boolean> {
+// Refactored toggleNoticeLike: Uses RPC for atomic updates
+export async function toggleNoticeLike(noticeId: string): Promise<boolean> {
+    const supabase = await createServerClient();
+
+    // Get user securely
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+    const userId = user.id;
+
+    // Use admin client ONLY for the like check/insert to avoid complex RLS on likes table if needed,
+    // BUT we should iterate to use serverClient with proper RLS for likes too.
+    // For now, consistent with goal: Use simple logic but secure the user ID.
+    // Actually, let's stick to admin client for the like relationship managing to be safe on permission errors,
+    // BUT use RPC for the count update to ensure atomicity.
     const adminClient = createAdminClient();
 
     // Check if already liked
@@ -433,21 +450,17 @@ export async function toggleNoticeLike(noticeId: string, userId: string): Promis
     if (existing) {
         // Unlike
         await adminClient.from("notice_likes").delete().eq("notice_id", noticeId).eq("user_id", userId);
-        await adminClient.rpc('decrement_notice_like_count', { row_id: noticeId }); // Need RPC or manual update
-        // Manual update for simplicity (since RPC might not exist)
-        const { data: notice } = await adminClient.from("notices").select("like_count").eq("id", noticeId).single();
-        if (notice) {
-            await adminClient.from("notices").update({ like_count: Math.max(0, (notice.like_count || 0) - 1) }).eq("id", noticeId);
-        }
+        // Use RPC for atomic decrement
+        await adminClient.rpc('decrement_notice_like_count', { row_id: noticeId });
+
         revalidatePath("/notice");
         return false;
     } else {
         // Like
         await adminClient.from("notice_likes").insert({ notice_id: noticeId, user_id: userId });
-        const { data: notice } = await adminClient.from("notices").select("like_count").eq("id", noticeId).single();
-        if (notice) {
-            await adminClient.from("notices").update({ like_count: (notice.like_count || 0) + 1 }).eq("id", noticeId);
-        }
+        // Use RPC for atomic increment
+        await adminClient.rpc('increment_notice_like_count', { row_id: noticeId });
+
         revalidatePath("/notice");
         return true;
     }

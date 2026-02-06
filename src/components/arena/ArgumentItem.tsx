@@ -89,7 +89,7 @@ export function ArgumentItem({ argument, currentUser, userProfile }: ArgumentIte
 
         try {
             setIsPosting(true);
-            const result = await postComment(argument.id, newComment, currentUser.id, newCommentImageUrls);
+            const result = await postComment(argument.id, newComment, newCommentImageUrls);
 
             if (result.success && result.comment) {
                 const newCommentObj: Comment & { profiles: Profile | null; is_liked: boolean } = {

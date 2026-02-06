@@ -27,8 +27,8 @@ export function CommentForm({ argumentId, userId, onCommentPosted }: CommentForm
     // argumentId와 userId를 클로저를 통해 전달합니다.
     const postCommentWithArgs = async (_: any, formData: FormData) => {
         const content = formData.get("content") as string;
-        // postComment 서버 액션은 userId를 직접 인자로 받으므로 formData에서 다시 추출할 필요 없음
-        const result = await postComment(argumentId, content, userId);
+        // postComment 서버 액션은 userId를 직접 인자로 받지 않고 세션에서 가져옴
+        const result = await postComment(argumentId, content);
         if (result.success) {
             onCommentPosted(); // 댓글 게시 성공 시 콜백 호출
         }
