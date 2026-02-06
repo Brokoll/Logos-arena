@@ -11,6 +11,12 @@ const noticeSchema = z.object({
     content: z.string().min(1, "내용을 입력하세요."),
 });
 
+// Schema for creating a debate
+const debateSchema = z.object({
+    topic: z.string().min(5, "주제는 최소 5자 이상이어야 합니다."),
+    description: z.string().optional(),
+});
+
 async function checkAdmin() {
     const supabase = await createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -52,6 +58,34 @@ export async function createNotice(prevState: any, formData: FormData) {
 
     revalidatePath("/notice");
     redirect("/notice");
+}
+
+export async function createDebate(prevState: any, formData: FormData) {
+    const isAdmin = await checkAdmin();
+    if (!isAdmin) {
+        return { error: "권한이 없습니다." };
+    }
+
+    const rawData = {
+        topic: formData.get("topic"),
+        description: formData.get("description") || undefined,
+    };
+
+    const validation = debateSchema.safeParse(rawData);
+    if (!validation.success) {
+        return { error: validation.error.issues[0].message };
+    }
+
+    const supabase = await createServerClient();
+    const { error } = await supabase.from("debates").insert(validation.data);
+
+    if (error) {
+        console.error("Debate create error:", error);
+        return { error: "토론 주제 생성 실패" };
+    }
+
+    revalidatePath("/");
+    redirect("/");
 }
 
 export async function deleteArgument(argumentId: string) {
