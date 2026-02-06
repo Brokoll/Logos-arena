@@ -58,7 +58,7 @@ export default function PrivacyPage() {
                                     </tr>
                                     <tr className="border-b-[2px] border-foreground">
                                         <td className="p-4 border-r border-foreground font-bold">유료 결제 시</td>
-                                        <td className="p-4 border-r border-foreground"><span className="px-3 py-1 border-2 border-foreground rounded-full text-[10px] font-black uppercase whitespace-nowrap">플랫특</span></td>
+                                        <td className="p-4 border-r border-foreground"><span className="px-3 py-1 border-2 border-foreground rounded-full text-[10px] font-black uppercase whitespace-nowrap">플랫폼</span></td>
                                         <td className="p-4 border-r border-foreground">결제 승인 번호 및 결제 기록 (기능 도입 시 수집)</td>
                                         <td className="p-4">결제 처리 및 이용 권한 확인 (현재 모든 서비스 무료)</td>
                                     </tr>
