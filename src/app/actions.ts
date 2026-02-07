@@ -15,6 +15,7 @@ interface CommentResult {
 interface SubmitResult {
     success: boolean;
     error?: string;
+    argument?: Argument;
 }
 
 // --- Helpers ---
@@ -181,7 +182,11 @@ export async function submitArgument(formData: {
             image_urls: formData.image_urls || [],
         };
 
-        const { error: dbError } = await supabase.from("arguments").insert(insertData);
+        const { data: newArgument, error: dbError } = await supabase
+            .from("arguments")
+            .insert(insertData)
+            .select()
+            .single();
 
         if (dbError) {
             console.error("Supabase error:", dbError);
@@ -196,6 +201,7 @@ export async function submitArgument(formData: {
 
         return {
             success: true,
+            argument: newArgument as Argument
         };
     } catch (error) {
         console.error("Submit error:", error);

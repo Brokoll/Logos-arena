@@ -44,19 +44,12 @@ export function ArenaClient({
             // user_id is now handled on server side
         });
 
-        if (result.success) {
+        if (result.success && result.argument) {
             const newArg: Argument & { profiles: Profile | null; is_liked: boolean; comment_count: number } = {
-                id: crypto.randomUUID(),
-                debate_id: data.debate_id,
-                user_id: user.id,
-                side: data.side,
-                content: data.content,
-                like_count: 0,
-                created_at: new Date().toISOString(),
+                ...result.argument,
                 profiles: userProfile,
                 is_liked: false,
-                comment_count: 0,
-                image_urls: data.image_urls || []
+                comment_count: 0
             };
 
             if (data.side === "pro") {
