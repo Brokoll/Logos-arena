@@ -7,9 +7,9 @@ import type { Argument, Profile } from "@/lib/database.types";
 import Link from "next/link";
 
 interface PageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 export default async function DebatePage({ params }: PageProps) {
@@ -22,7 +22,9 @@ export default async function DebatePage({ params }: PageProps) {
         userProfile = data;
     }
 
-    const debate = await getDebateById(params.id);
+    const resolvedParams = await params;
+    console.log(`[DebatePage] Params resolved. ID: ${resolvedParams.id}`);
+    const debate = await getDebateById(resolvedParams.id);
     let pro: (Argument & { profiles: Profile | null; is_liked: boolean })[] = [];
     let con: (Argument & { profiles: Profile | null; is_liked: boolean })[] = [];
 

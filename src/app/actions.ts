@@ -319,6 +319,7 @@ export async function getDebatesList(): Promise<(Debate & { argument_count: numb
 }
 
 export async function getDebateById(id: string): Promise<Debate | null> {
+    console.log(`[getDebateById] Fetching debate with ID: ${id}`);
     const supabase = await createServerClient();
     const { data, error } = await supabase
         .from("debates")
@@ -327,12 +328,14 @@ export async function getDebateById(id: string): Promise<Debate | null> {
         .single();
 
     if (error) {
-        console.error("Debate fetch error:", error);
+        console.error("[getDebateById] Error:", error); // Log the full error
         return null;
     }
-
+    console.log(`[getDebateById] Success, found:`, data?.topic);
     return data as Debate;
 }
+
+
 
 export async function getRanking(): Promise<Profile[]> {
     const supabase = await createServerClient();
