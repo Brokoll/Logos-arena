@@ -15,20 +15,20 @@ interface ArgumentFormProps {
     optionB: string;
     onSubmit: (data: {
         debate_id: string;
-        side: string;
+        side: "pro" | "con";
         content: string;
         image_urls?: string[];
-    }) => Promise<{ success: boolean; error?: string; score?: number; feedback?: string }>;
+    }) => Promise<{ success: boolean; error?: string }>;
 }
 
 export function ArgumentForm({ debateId, currentUser, optionA, optionB, onSubmit }: ArgumentFormProps) {
     const router = useRouter();
-    const [side, setSide] = useState<string | null>(null);
+    const [side, setSide] = useState<"pro" | "con" | null>(null);
     const [content, setContent] = useState("");
     const [imageUrls, setImageUrls] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [result, setResult] = useState<{ score: number; feedback?: string } | null>(null);
+    const [showSuccess, setShowSuccess] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -46,7 +46,7 @@ export function ArgumentForm({ debateId, currentUser, optionA, optionB, onSubmit
 
         setIsSubmitting(true);
         setError(null);
-        setResult(null);
+        setShowSuccess(false);
 
         try {
             const response = await onSubmit({
@@ -57,7 +57,7 @@ export function ArgumentForm({ debateId, currentUser, optionA, optionB, onSubmit
             });
 
             if (response.success) {
-                setResult({ score: 0, feedback: response.feedback }); // Score ignored
+                setShowSuccess(true);
                 setContent("");
                 setImageUrls([]);
                 setSide(null);
@@ -85,10 +85,10 @@ export function ArgumentForm({ debateId, currentUser, optionA, optionB, onSubmit
                 <div className="grid grid-cols-2 gap-4">
                     <button
                         type="button"
-                        onClick={() => setSide(optionA)}
+                        onClick={() => setSide("pro")}
                         className={cn(
                             "py-6 border-[3px] font-black uppercase tracking-tighter transition-all duration-300 transform active:scale-95",
-                            side === optionA
+                            side === "pro"
                                 ? "bg-foreground text-background border-foreground text-2xl"
                                 : "border-foreground/10 hover:border-foreground opacity-30 hover:opacity-100"
                         )}
@@ -97,10 +97,10 @@ export function ArgumentForm({ debateId, currentUser, optionA, optionB, onSubmit
                     </button>
                     <button
                         type="button"
-                        onClick={() => setSide(optionB)}
+                        onClick={() => setSide("con")}
                         className={cn(
                             "py-6 border-[3px] font-black uppercase tracking-tighter transition-all duration-300 transform active:scale-95",
-                            side === optionB
+                            side === "con"
                                 ? "bg-foreground text-background border-foreground text-2xl"
                                 : "border-foreground/10 hover:border-foreground opacity-30 hover:opacity-100"
                         )}
@@ -144,12 +144,9 @@ export function ArgumentForm({ debateId, currentUser, optionA, optionB, onSubmit
                 )}
 
                 {/* Success Display */}
-                {result && (
+                {showSuccess && (
                     <div className="border-[3px] border-foreground bg-foreground text-background p-6 space-y-2">
                         <p className="font-black uppercase tracking-widest text-sm">✅ 제출 완료!</p>
-                        {result.feedback && (
-                            <p className="text-sm font-medium opacity-90">{result.feedback}</p>
-                        )}
                     </div>
                 )}
 

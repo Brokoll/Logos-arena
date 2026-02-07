@@ -11,8 +11,8 @@ interface ArenaClientProps {
     debateId: string;
     optionA: string;
     optionB: string;
-    initialProArguments: (Argument & { profiles: Profile | null; is_liked: boolean })[];
-    initialConArguments: (Argument & { profiles: Profile | null; is_liked: boolean })[];
+    initialProArguments: (Argument & { profiles: Profile | null; is_liked: boolean; comment_count: number })[];
+    initialConArguments: (Argument & { profiles: Profile | null; is_liked: boolean; comment_count: number })[];
     user: User | null;
     userProfile: Profile | null;
 }
@@ -31,7 +31,7 @@ export function ArenaClient({
 
     const handleSubmit = async (data: {
         debate_id: string;
-        side: string;
+        side: "pro" | "con";
         content: string;
         image_urls?: string[];
     }) => {
@@ -45,23 +45,21 @@ export function ArenaClient({
         });
 
         if (result.success) {
-            const newArg: Argument & { profiles: Profile | null; is_liked: boolean } = {
+            const newArg: Argument & { profiles: Profile | null; is_liked: boolean; comment_count: number } = {
                 id: crypto.randomUUID(),
                 debate_id: data.debate_id,
                 user_id: user.id,
                 side: data.side,
                 content: data.content,
-                score: null, // Initial score
                 like_count: 0,
-                feedback: result.feedback ?? null,
                 created_at: new Date().toISOString(),
-                profiles: null,
+                profiles: userProfile,
                 is_liked: false,
                 comment_count: 0,
                 image_urls: data.image_urls || []
             };
 
-            if (data.side === optionA) {
+            if (data.side === "pro") {
                 setProArguments([newArg, ...proArguments]);
             } else {
                 setConArguments([newArg, ...conArguments]);
