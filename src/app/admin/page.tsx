@@ -38,13 +38,13 @@ export default async function AdminPage() {
         <div className="min-h-screen bg-background text-foreground p-8 md:p-24">
             <div className="max-w-4xl mx-auto space-y-12">
                 {/* Header */}
-                <div className="border-b-[4px] border-foreground pb-8">
+                <div className="border-b-[4px] border-foreground pb-8 border-red-500 bg-red-500/5 p-4">
                     <Link href="/" className="text-sm font-black hover:opacity-70 transition-opacity uppercase tracking-widest block mb-8">
                         ← Back to Arena
                     </Link>
-                    <h1 className="text-5xl md:text-7xl font-[900] tracking-tighter uppercase leading-none">
-                        Admin Panel<br />
-                        <span className="text-2xl md:text-3xl font-black">관리자 패널</span>
+                    <h1 className="text-5xl md:text-7xl font-[900] tracking-tighter uppercase leading-none text-red-500">
+                        Admin Panel (DEBUG)<br />
+                        <span className="text-2xl md:text-3xl font-black text-foreground">관리자 패널 - 수정 모드</span>
                     </h1>
                     <p className="mt-4 text-sm font-medium uppercase tracking-widest opacity-60">
                         토론 주제 생성 및 관리
