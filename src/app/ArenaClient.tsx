@@ -11,7 +11,6 @@ interface ArenaClientProps {
     debateId: string;
     optionA: string;
     optionB: string;
-    debateImageUrl?: string | null;
     initialProArguments: (Argument & { profiles: Profile | null; is_liked: boolean })[];
     initialConArguments: (Argument & { profiles: Profile | null; is_liked: boolean })[];
     user: User | null;
@@ -22,7 +21,6 @@ export function ArenaClient({
     debateId,
     optionA,
     optionB,
-    debateImageUrl,
     initialProArguments,
     initialConArguments,
     user,
@@ -79,7 +77,7 @@ export function ArenaClient({
             <section>
                 {/* Argument Form (Handles guest check internally) */}
                 <section>
-                    <ArgumentForm debateId={debateId} currentUser={user} optionA={optionA} optionB={optionB} debateImageUrl={debateImageUrl} onSubmit={handleSubmit} />
+                    <ArgumentForm debateId={debateId} currentUser={user} optionA={optionA} optionB={optionB} onSubmit={handleSubmit} />
                 </section>
             </section>
 

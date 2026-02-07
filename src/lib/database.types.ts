@@ -16,7 +16,6 @@ export interface Database {
                     description: string | null
                     option_a: string
                     option_b: string
-                    image_url: string | null
                     status: 'active' | 'closed'
                     created_at: string
                 }
@@ -26,7 +25,6 @@ export interface Database {
                     description?: string | null
                     option_a?: string
                     option_b?: string
-                    image_url?: string | null
                     status?: 'active' | 'closed'
                     created_at?: string
                 }
@@ -36,7 +34,6 @@ export interface Database {
                     description?: string | null
                     option_a?: string
                     option_b?: string
-                    image_url?: string | null
                     status?: 'active' | 'closed'
                     created_at?: string
                 }
@@ -188,9 +185,6 @@ export interface Database {
                     username: string | null
                     total_score: number
                     argument_count: number
-                    rank: number | null
-                    gender: 'male' | 'female' | 'other' | null
-                    age: number | null
                     role: 'user' | 'admin'
                     created_at: string
                 }
@@ -199,9 +193,6 @@ export interface Database {
                     username?: string | null
                     total_score?: number
                     argument_count?: number
-                    rank?: number | null
-                    gender?: 'male' | 'female' | 'other' | null
-                    age?: number | null
                     created_at?: string
                 }
                 Update: {
@@ -209,9 +200,6 @@ export interface Database {
                     username?: string | null
                     total_score?: number
                     argument_count?: number
-                    rank?: number | null
-                    gender?: 'male' | 'female' | 'other' | null
-                    age?: number | null
                     created_at?: string
                 }
                 Relationships: [
@@ -229,11 +217,9 @@ export interface Database {
                     debate_id: string
                     user_id: string
                     side: 'pro' | 'con'
-                    content: string  // 통합 필드
-                    score: number | null
+                    content: string
                     like_count: number
                     image_urls: string[] | null
-                    feedback: string | null
                     created_at: string
                 }
                 Insert: {
@@ -242,9 +228,7 @@ export interface Database {
                     user_id: string
                     side: 'pro' | 'con'
                     content: string
-                    score?: number | null
                     image_urls?: string[] | null
-                    feedback?: string | null
                     created_at?: string
                 }
                 Update: {
@@ -253,8 +237,6 @@ export interface Database {
                     user_id?: string
                     side?: 'pro' | 'con'
                     content?: string
-                    score?: number | null
-                    feedback?: string | null
                     created_at?: string
                 }
             }

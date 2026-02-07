@@ -17,7 +17,6 @@ const debateSchema = z.object({
     description: z.string().optional(),
     option_a: z.string().min(1, "선택지 A를 입력하세요.").max(50, "선택지 A는 최대 50자입니다."),
     option_b: z.string().min(1, "선택지 B를 입력하세요.").max(50, "선택지 B는 최대 50자입니다."),
-    image_url: z.string().url().optional().or(z.literal("")),
 });
 
 async function checkAdmin() {
@@ -74,7 +73,6 @@ export async function createDebate(prevState: any, formData: FormData) {
         description: formData.get("description") || undefined,
         option_a: formData.get("option_a"),
         option_b: formData.get("option_b"),
-        image_url: formData.get("image_url") || undefined,
     };
 
     const validation = debateSchema.safeParse(rawData);

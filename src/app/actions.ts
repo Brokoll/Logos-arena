@@ -15,8 +15,6 @@ interface CommentResult {
 interface SubmitResult {
     success: boolean;
     error?: string;
-    score?: number;
-    feedback?: string;
 }
 
 // --- Helpers ---
@@ -145,12 +143,10 @@ export async function submitArgument(formData: {
         // 6. Save to Supabase (use server client, RLS enabled)
         const insertData: NewArgument = {
             debate_id: formData.debate_id,
-            user_id: userId, // From session
+            user_id: userId,
             side: formData.side,
             content: formData.content,
             image_urls: formData.image_urls || [],
-            score: null,
-            feedback: null, // AI feedback disabled
         };
 
         const { error: dbError } = await supabase.from("arguments").insert(insertData);
@@ -168,8 +164,6 @@ export async function submitArgument(formData: {
 
         return {
             success: true,
-            score: undefined,
-            feedback: undefined,
         };
     } catch (error) {
         console.error("Submit error:", error);
@@ -312,7 +306,7 @@ export async function getRanking(): Promise<Profile[]> {
     const supabase = await createServerClient();
     const { data } = await supabase
         .from("profiles")
-        .select("id, username, total_score, argument_count, rank")
+        .select("id, username, total_score, argument_count")
         .order("total_score", { ascending: false })
         .limit(100);
 
