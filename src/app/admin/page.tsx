@@ -25,7 +25,7 @@ export default async function AdminPage() {
     // 토론 목록 가져오기
     const { data: debates, error: debatesError } = await supabase
         .from("debates")
-        .select("id, topic, option_a, option_b, status, created_at")
+        .select("id, topic, description, option_a, option_b, status, created_at")
         .order("created_at", { ascending: false });
 
     if (debatesError) {

@@ -19,6 +19,11 @@ const debateSchema = z.object({
     option_b: z.string().min(1, "선택지 B를 입력하세요.").max(50, "선택지 B는 최대 50자입니다."),
 });
 
+// Schema for updating a debate (includes status)
+const updateDebateSchema = debateSchema.extend({
+    status: z.enum(["active", "closed"]).optional(),
+});
+
 async function checkAdmin() {
     const supabase = await createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -90,6 +95,39 @@ export async function createDebate(prevState: any, formData: FormData) {
 
     revalidatePath("/");
     return { error: "", success: true };
+}
+
+export async function updateDebate(debateId: string, formData: FormData) {
+    const isAdmin = await checkAdmin();
+    if (!isAdmin) return { success: false, error: "Unauthorized" };
+
+    const rawData = {
+        topic: formData.get("topic"),
+        description: formData.get("description") || undefined,
+        option_a: formData.get("option_a"),
+        option_b: formData.get("option_b"),
+        status: formData.get("status"),
+    };
+
+    const validation = updateDebateSchema.safeParse(rawData);
+    if (!validation.success) {
+        return { success: false, error: validation.error.issues[0].message };
+    }
+
+    const supabase = await createServerClient();
+    const { error } = await supabase
+        .from("debates")
+        .update(validation.data)
+        .eq("id", debateId);
+
+    if (error) {
+        console.error("Update debate error:", error);
+        return { success: false, error: "토론 수정 실패" };
+    }
+
+    revalidatePath("/");
+    revalidatePath("/admin");
+    return { success: true };
 }
 
 export async function deleteArgument(argumentId: string) {
