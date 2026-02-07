@@ -58,7 +58,7 @@ export function DebateList({ debates }: DebateListProps) {
                         className="border-[3px] border-foreground p-6 flex flex-col md:flex-row md:items-center justify-between gap-4"
                     >
                         <div className="flex-1 min-w-0">
-                            <h3 className="font-black text-lg truncate">{debate.topic}</h3>
+                            <h3 className="font-black text-lg break-all">{debate.topic}</h3>
                             <div className="flex flex-wrap gap-2 mt-2">
                                 <span className="text-xs font-bold bg-foreground/10 px-2 py-1">
                                     {debate.option_a}

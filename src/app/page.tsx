@@ -67,16 +67,15 @@ export default async function Home() {
                     </span>
                   </div>
 
-                  <h3 className="text-2xl font-[900] tracking-tighter leading-tight group-hover:underline decoration-4 underline-offset-4">
+                  <h3 className="text-2xl font-[900] tracking-tighter leading-tight group-hover:underline decoration-4 underline-offset-4 line-clamp-2 break-words">
                     {debate.topic}
                   </h3>
 
                   {debate.description && (
-                    <p className="text-sm font-medium opacity-60 line-clamp-3 leading-relaxed">
+                    <p className="text-sm font-medium opacity-60 line-clamp-3 leading-relaxed break-words">
                       {debate.description}
                     </p>
-                  )}
-                </div>
+                  )}                </div>
 
                 <div className="mt-8 pt-6 border-t-2 border-foreground/10 flex justify-between items-center">
                   <div className="flex items-center gap-2">
