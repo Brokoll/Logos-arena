@@ -68,7 +68,7 @@ export function DebateList({ debates }: DebateListProps) {
                                     {debate.option_b}
                                 </span>
                             </div>
-                            <p className="text-xs font-medium opacity-50 mt-2">
+                            <p className="text-xs font-medium opacity-50 mt-2" suppressHydrationWarning>
                                 {new Date(debate.created_at).toLocaleDateString("ko-KR")} ·
                                 상태: {debate.status === "active" ? "🟢 진행중" : "🔴 종료"}
                             </p>

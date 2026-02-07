@@ -4,6 +4,8 @@ import { DebateForm } from "@/components/admin/DebateForm";
 import { DebateList } from "@/components/admin/DebateList";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPage() {
     const supabase = await createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -112,7 +114,7 @@ export default async function AdminPage() {
 
                 {/* Footer */}
                 <div className="pt-12 border-t-[4px] border-foreground text-xs font-black uppercase tracking-widest text-center opacity-30">
-                    ADMIN ACCESS ONLY
+                    ADMIN ACCESS ONLY (v1.1 - Edit Enabled)
                 </div>
             </div>
         </div>
