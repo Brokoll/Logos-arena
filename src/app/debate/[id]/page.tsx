@@ -58,30 +58,35 @@ export default async function DebatePage({ params }: PageProps) {
                 {debate ? (
                     <div className="space-y-20">
                         {/* Topic Hero Section */}
-                        <section className="text-center space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                            <div className="inline-block px-4 py-1 border-2 border-foreground text-[10px] font-black uppercase tracking-[0.2em] mb-4">
-                                Current Battle
-                            </div>
-                            <h2 className="text-5xl md:text-7xl font-[900] leading-[0.9] tracking-tighter text-balance">
-                                {debate.topic}
-                            </h2>
-                            <div className="flex justify-center">
-                                <ShareButton />
-                            </div>
-                            {debate.description && (
-                                <p className="max-w-2xl mx-auto text-xl opacity-60 font-medium leading-relaxed">
-                                    {debate.description}
-                                </p>
-                            )}
+                        <section
+                            className="text-center space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000 relative py-16 px-8 rounded-2xl overflow-hidden"
+                            style={debate.image_url ? {
+                                backgroundImage: `url(${debate.image_url})`,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                            } : undefined}
+                        >
+                            {/* Dark overlay for text readability */}
                             {debate.image_url && (
-                                <div className="max-w-2xl mx-auto pt-4">
-                                    <img
-                                        src={debate.image_url}
-                                        alt={debate.topic}
-                                        className="w-full rounded-lg border-[3px] border-foreground/20 shadow-2xl"
-                                    />
-                                </div>
+                                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
                             )}
+
+                            <div className="relative z-10">
+                                <div className="inline-block px-4 py-1 border-2 border-foreground text-[10px] font-black uppercase tracking-[0.2em] mb-4">
+                                    Current Battle
+                                </div>
+                                <h2 className="text-5xl md:text-7xl font-[900] leading-[0.9] tracking-tighter text-balance">
+                                    {debate.topic}
+                                </h2>
+                                <div className="flex justify-center mt-8">
+                                    <ShareButton />
+                                </div>
+                                {debate.description && (
+                                    <p className="max-w-2xl mx-auto text-xl opacity-80 font-medium leading-relaxed mt-8">
+                                        {debate.description}
+                                    </p>
+                                )}
+                            </div>
                         </section>
 
                         {/* Arena Client (Form + Feed) */}
