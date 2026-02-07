@@ -19,6 +19,26 @@ interface SubmitResult {
 
 // --- Helpers ---
 
+function validateImageUrls(urls: string[] | undefined): string | null {
+    if (!urls || urls.length === 0) return null;
+    if (urls.length > 10) return "이미지는 최대 10장까지만 첨부할 수 있습니다.";
+
+    for (const url of urls) {
+        if (typeof url !== 'string') return "잘못된 이미지 형입니다.";
+        if (url.length > 2000) return "이미지 URL이 너무 깁니다.";
+        // Basic XSS protection: specific protocols only
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            return "이미지는 http 또는 https로 시작해야 합니다.";
+        }
+        try {
+            new URL(url);
+        } catch {
+            return "유효하지 않은 이미지 URL입니다.";
+        }
+    }
+    return null;
+}
+
 async function checkCooldown(table: string, userId: string, cooldownMinutes: number = 1) {
     const supabase = await createServerClient();
     const { data } = await supabase
@@ -60,6 +80,10 @@ export async function postComment(argumentId: string, content: string, imageUrls
         if (content.trim().length > 500) {
             return { success: false, error: "댓글 내용은 500자를 초과할 수 없습니다." };
         }
+
+        // 2.1 Validate Images
+        const imageError = validateImageUrls(imageUrls);
+        if (imageError) return { success: false, error: imageError };
 
         // 3. Verify argumentId exists
         const { data: argumentData, error: argumentError } = await supabase
@@ -137,6 +161,14 @@ export async function submitArgument(formData: {
         }
 
         // 4. (Removed) AI Analysis - Logic score and toxicity check disabled
+
+        // 4.1 Validate Images
+        if (formData.image_urls) {
+            const imageError = validateImageUrls(formData.image_urls);
+            if (imageError) {
+                return { success: false, error: imageError };
+            }
+        }
 
         // 5. (Removed) Toxicity check disabled
 
@@ -383,6 +415,9 @@ export async function postNoticeComment(noticeId: string, content: string, image
 
         if (!content || !content.trim()) return { success: false, error: "내용이 없습니다." };
         if (content.trim().length > 500) return { success: false, error: "댓글은 500자를 초과할 수 없습니다." };
+
+        const imageError = validateImageUrls(imageUrls);
+        if (imageError) return { success: false, error: imageError };
 
         // 2. Insert using serverClient (RLS)
         const { data, error } = await supabase.from("notice_comments").insert({
