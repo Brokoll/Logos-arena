@@ -13,6 +13,7 @@ interface ArgumentFormProps {
     currentUser: User | null;
     optionA: string;
     optionB: string;
+    debateImageUrl?: string | null;
     onSubmit: (data: {
         debate_id: string;
         side: string;
@@ -21,7 +22,7 @@ interface ArgumentFormProps {
     }) => Promise<{ success: boolean; error?: string; score?: number; feedback?: string }>;
 }
 
-export function ArgumentForm({ debateId, currentUser, optionA, optionB, onSubmit }: ArgumentFormProps) {
+export function ArgumentForm({ debateId, currentUser, optionA, optionB, debateImageUrl, onSubmit }: ArgumentFormProps) {
     const router = useRouter();
     const [side, setSide] = useState<string | null>(null);
     const [content, setContent] = useState("");
@@ -79,6 +80,15 @@ export function ArgumentForm({ debateId, currentUser, optionA, optionB, onSubmit
                         건강하고 건설적인 토론장이 되길 바랍니다
                     </h2>
                     <p className="text-sm opacity-40 font-bold tracking-widest">서로를 존중하며 의견을 나눠주세요</p>
+                    {debateImageUrl && (
+                        <div className="pt-6">
+                            <img
+                                src={debateImageUrl}
+                                alt="토론 이미지"
+                                className="max-w-2xl mx-auto w-full rounded-lg border-[3px] border-foreground/20 shadow-2xl"
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {/* Side Selection with Custom Options */}

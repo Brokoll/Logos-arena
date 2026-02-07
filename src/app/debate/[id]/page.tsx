@@ -90,6 +90,7 @@ export default async function DebatePage({ params }: PageProps) {
                                 debateId={debate.id}
                                 optionA={debate.option_a || "찬성"}
                                 optionB={debate.option_b || "반대"}
+                                debateImageUrl={debate.image_url}
                                 initialProArguments={pro}
                                 initialConArguments={con}
                                 user={user}
