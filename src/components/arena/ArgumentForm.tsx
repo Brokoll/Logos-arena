@@ -75,10 +75,10 @@ export function ArgumentForm({ debateId, currentUser, optionA, optionB, onSubmit
         <>
             <form onSubmit={handleSubmit} className="space-y-8">
                 <div className="text-center space-y-2">
-                    <h2 className="text-3xl font-[900] tracking-tighter uppercase">
-                        ⚔️ Share Your Thoughts in the Arena
+                    <h2 className="text-3xl font-[900] tracking-tighter">
+                        건강하고 건설적인 토론장이 되길 바랍니다
                     </h2>
-                    <p className="text-sm opacity-40 font-bold uppercase tracking-widest">Share your thoughts in the Arena</p>
+                    <p className="text-sm opacity-40 font-bold tracking-widest">서로를 존중하며 의견을 나눠주세요</p>
                 </div>
 
                 {/* Side Selection with Custom Options */}
