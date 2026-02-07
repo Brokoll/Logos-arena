@@ -23,7 +23,6 @@ export default async function DebatePage({ params }: PageProps) {
     }
 
     const resolvedParams = await params;
-    console.log(`[DebatePage] Params resolved. ID: ${resolvedParams.id}`);
     const debate = await getDebateById(resolvedParams.id);
     let pro: (Argument & { profiles: Profile | null; is_liked: boolean })[] = [];
     let con: (Argument & { profiles: Profile | null; is_liked: boolean })[] = [];
