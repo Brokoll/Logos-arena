@@ -160,19 +160,34 @@ export function ArgumentItem({ argument, currentUser, userProfile }: ArgumentIte
     const isUserAdmin = userProfile?.role === 'admin';
     const isArgOwner = currentUser?.id === argument.user_id;
 
+    // Report State
+    const [showReportModal, setShowReportModal] = useState(false);
+    const [reportTarget, setReportTarget] = useState<{ type: 'argument' | 'comment', id: string } | null>(null);
+
+    const handleReport = (type: 'argument' | 'comment', id: string) => {
+        if (!currentUser) {
+            setShowLoginModal(true);
+            return;
+        }
+        setReportTarget({ type, id });
+        setShowReportModal(true);
+    };
+
     return (
         <div className="border border-foreground/20 shadow-sm p-8 bg-background space-y-6 relative rounded-sm hover:shadow-md transition-shadow">
             {/* Argument Content */}
             <div className="flex justify-between items-start">
                 <div className="space-y-4 w-full">
                     <div className="flex items-center gap-3 mb-2">
+                        {/* ... (Side badge and User) ... */}
                         <span className={`inline-block px-3 py-1 text-[10px] uppercase font-black tracking-[0.2em] border border-foreground/10 rounded-full ${argument.side === 'pro' ? 'bg-foreground text-background' : 'bg-background text-foreground'}`}>
                             {argument.side.toUpperCase()}
                         </span>
                         <span className="text-xs font-bold opacity-40 uppercase tracking-widest">
                             {argument.profiles?.username || "Unknown Warrior"}
                         </span>
-                        {/* Edit/Delete Actions for Argument */}
+
+                        {/* Action Buttons (Edit/Delete) */}
                         <ActionButtons
                             isOwner={isArgOwner}
                             isAdmin={isUserAdmin}
@@ -182,8 +197,20 @@ export function ArgumentItem({ argument, currentUser, userProfile }: ArgumentIte
                             }}
                             onDelete={handleDeleteArgument}
                         />
+
+                        {/* Report Button (Argument) */}
+                        {!isArgOwner && (
+                            <button
+                                onClick={() => handleReport('argument', argument.id)}
+                                className="ml-auto text-xs opacity-20 hover:opacity-100 hover:text-red-500 transition-all"
+                                title="Report"
+                            >
+                                🏳️
+                            </button>
+                        )}
                     </div>
 
+                    {/* ... (Edit/View Logic) ... */}
                     {isEditingArgument ? (
                         <div>
                             <textarea
@@ -203,7 +230,7 @@ export function ArgumentItem({ argument, currentUser, userProfile }: ArgumentIte
                         </p>
                     )}
 
-                    {/* Multi-Image Display */}
+                    {/* ... (Images Logic) ... */}
                     {argument.image_urls && argument.image_urls.length > 0 && !isEditingArgument && (
                         <div className="mt-4">
                             <button
@@ -214,7 +241,6 @@ export function ArgumentItem({ argument, currentUser, userProfile }: ArgumentIte
                                 <span className={`text-[10px] transition-transform ${showArgumentImages ? 'rotate-180' : ''}`}>▼</span>
                             </button>
 
-                            {/* Image Grid */}
                             {showArgumentImages && (
                                 <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-2 animate-in slide-in-from-top-2">
                                     {argument.image_urls.map((url, idx) => (
@@ -236,8 +262,6 @@ export function ArgumentItem({ argument, currentUser, userProfile }: ArgumentIte
                     )}
                 </div>
             </div>
-
-
 
             {/* Action Bar */}
             <div className="pt-6 border-t border-foreground/5 flex items-center justify-between gap-4">
@@ -263,19 +287,29 @@ export function ArgumentItem({ argument, currentUser, userProfile }: ArgumentIte
             {/* Comment Section */}
             {isCommentsOpen && (
                 <div className="mt-4 pl-4 border-l-[3px] border-foreground/10 space-y-6 animate-in slide-in-from-top-2">
-                    {/* Comment List */}
                     <div className="space-y-3">
                         {isLoading ? (
                             <p className="text-xs opacity-40">Loading comments...</p>
                         ) : comments.length > 0 ? (
                             comments.map(comment => (
-                                <div key={comment.id} className="text-sm">
+                                <div key={comment.id} className="text-sm group/comment">
                                     <div className="flex items-center justify-between gap-2 mb-0.5">
-                                        <p className="font-bold opacity-30 text-[10px]">
-                                            {comment.profiles?.username || "Unknown Warrior"} • {new Date(comment.created_at || "").toLocaleTimeString()}
-                                        </p>
+                                        <div className="flex items-center gap-2">
+                                            <p className="font-bold opacity-30 text-[10px]">
+                                                {comment.profiles?.username || "Unknown Warrior"} • {new Date(comment.created_at || "").toLocaleTimeString()}
+                                            </p>
+                                            {/* Report Button (Comment) */}
+                                            {currentUser?.id !== comment.user_id && (
+                                                <button
+                                                    onClick={() => handleReport('comment', comment.id)}
+                                                    className="opacity-0 group-hover/comment:opacity-20 hover:!opacity-100 text-[10px] hover:text-red-500 transition-all"
+                                                    title="Report Comment"
+                                                >
+                                                    🏳️
+                                                </button>
+                                            )}
+                                        </div>
 
-                                        {/* Edit/Delete Actions for Comment */}
                                         {editingCommentId !== comment.id && (
                                             <ActionButtons
                                                 isOwner={currentUser?.id === comment.user_id}
@@ -289,7 +323,7 @@ export function ArgumentItem({ argument, currentUser, userProfile }: ArgumentIte
                                         )}
                                     </div>
 
-                                    {/* Content or Edit Form */}
+                                    {/* ... (Comment Content Logic) ... */}
                                     {editingCommentId === comment.id ? (
                                         <div className="mt-1">
                                             <textarea
@@ -345,7 +379,6 @@ export function ArgumentItem({ argument, currentUser, userProfile }: ArgumentIte
                         )}
                     </div>
 
-                    {/* Comment Form */}
                     <form onSubmit={handlePostComment} className="flex gap-2">
                         <div className="flex-1 flex gap-2 flex-col">
                             <textarea
@@ -369,7 +402,7 @@ export function ArgumentItem({ argument, currentUser, userProfile }: ArgumentIte
                 </div>
             )}
 
-            {/* Full Screen Image Modal */}
+            {/* Modals */}
             {selectedImage && (
                 <div
                     className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 cursor-zoom-out animate-in fade-in duration-200"
@@ -396,6 +429,17 @@ export function ArgumentItem({ argument, currentUser, userProfile }: ArgumentIte
                 onClose={() => setShowLoginModal(false)}
                 onConfirm={() => router.push("/login")}
             />
+
+            {reportTarget && (
+                <ReportModal
+                    isOpen={showReportModal}
+                    onClose={() => setShowReportModal(false)}
+                    targetType={reportTarget.type}
+                    targetId={reportTarget.id}
+                />
+            )}
         </div >
     );
 }
+
+import { ReportModal } from "@/components/ui/ReportModal";

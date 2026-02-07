@@ -153,8 +153,22 @@ export function NoticeItem({ notice, currentUser, userProfile }: NoticeItemProps
     // Actually notices don't have user_id in schema? Let's check schema.
     // Schema notices: id, title, content, created_at. No user_id. So only Admin can delete.
 
+    // Report State
+    const [showReportModal, setShowReportModal] = useState(false);
+    const [reportTarget, setReportTarget] = useState<{ type: 'notice_comment', id: string } | null>(null);
+
+    const handleReport = (type: 'notice_comment', id: string) => {
+        if (!currentUser) {
+            setShowLoginModal(true);
+            return;
+        }
+        setReportTarget({ type, id });
+        setShowReportModal(true);
+    };
+
     return (
         <article className="border-[3px] border-foreground p-8 bg-background hover:bg-foreground/5 transition-colors bw-glow group rounded-sm relative">
+            {/* ... (Existing Content) ... */}
             <div className="flex flex-col md:flex-row md:items-baseline md:justify-between gap-2 mb-4">
                 <h2 className="text-2xl font-[900] tracking-tighter uppercase group-hover:underline decoration-4 underline-offset-4">
                     {notice.title}
@@ -227,12 +241,22 @@ export function NoticeItem({ notice, currentUser, userProfile }: NoticeItemProps
                             <p className="text-xs opacity-40 text-center">Loading comments...</p>
                         ) : comments.length > 0 ? (
                             comments.map(comment => (
-                                <div key={comment.id} className="text-sm border-l-2 border-foreground/10 pl-4 py-1">
+                                <div key={comment.id} className="text-sm border-l-2 border-foreground/10 pl-4 py-1 group/comment">
                                     <div className="flex items-baseline justify-between mb-2">
                                         <div className="flex items-center gap-2">
                                             <span className="font-bold">{comment.profiles?.username || "Unknown"}</span>
                                             {comment.profiles?.role === 'admin' && (
                                                 <span className="text-[10px] bg-foreground text-background px-1 rounded-sm font-black uppercase">ADMIN</span>
+                                            )}
+                                            {/* Report Button */}
+                                            {currentUser?.id !== comment.user_id && (
+                                                <button
+                                                    onClick={() => handleReport('notice_comment', comment.id)}
+                                                    className="opacity-0 group-hover/comment:opacity-100 text-[10px] hover:text-red-500 transition-all"
+                                                    title="Report"
+                                                >
+                                                    🏳️
+                                                </button>
                                             )}
                                         </div>
                                         {/* Action Buttons for Comment */}
@@ -329,6 +353,17 @@ export function NoticeItem({ notice, currentUser, userProfile }: NoticeItemProps
                 onClose={() => setShowLoginModal(false)}
                 onConfirm={() => router.push("/login")}
             />
+
+            {reportTarget && (
+                <ReportModal
+                    isOpen={showReportModal}
+                    onClose={() => setShowReportModal(false)}
+                    targetType={reportTarget.type}
+                    targetId={reportTarget.id}
+                />
+            )}
         </article>
     );
 }
+
+import { ReportModal } from "@/components/ui/ReportModal";

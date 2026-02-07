@@ -18,18 +18,35 @@ export function AuthButton({ user, username }: AuthButtonProps) {
         router.refresh();
     };
 
+    const [showNicknameModal, setShowNicknameModal] = useState(false);
+
     if (user) {
         return (
             <div className="flex items-center gap-4">
-                <span className="text-xs font-black uppercase tracking-widest opacity-50 hidden md:block">
-                    {username || user.email?.split("@")[0]}
-                </span>
+                <div className="flex items-center gap-2">
+                    <span className="text-xs font-black uppercase tracking-widest opacity-50 hidden md:block">
+                        {username || user.email?.split("@")[0]}
+                    </span>
+                    <button
+                        onClick={() => setShowNicknameModal(true)}
+                        className="text-[10px] opacity-30 hover:opacity-100 transition-opacity"
+                        title="Change Nickname"
+                    >
+                        ⚙️
+                    </button>
+                </div>
                 <button
                     onClick={handleSignOut}
                     className="px-4 py-2 text-xs font-black uppercase tracking-widest border-2 border-foreground hover:bg-foreground hover:text-background transition-all"
                 >
                     Logout
                 </button>
+
+                <NicknameChangeModal
+                    isOpen={showNicknameModal}
+                    onClose={() => setShowNicknameModal(false)}
+                    currentUsername={username || ""}
+                />
             </div>
         );
     }
@@ -43,3 +60,6 @@ export function AuthButton({ user, username }: AuthButtonProps) {
         </a>
     );
 }
+
+import { useState } from "react";
+import { NicknameChangeModal } from "@/components/ui/NicknameChangeModal";

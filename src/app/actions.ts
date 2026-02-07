@@ -616,3 +616,92 @@ export async function deleteNotice(noticeId: string) {
     revalidatePath("/notice");
     return { success: true };
 }
+
+// --- User Profile Actions ---
+
+export async function updateUsername(newUsername: string) {
+    const supabase = await createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return { success: false, error: "로그인이 필요합니다." };
+
+    if (!newUsername || newUsername.trim().length < 2) {
+        return { success: false, error: "닉네임은 최소 2글자 이상이어야 합니다." };
+    }
+    if (newUsername.trim().length > 15) {
+        return { success: false, error: "닉네임은 최대 15글자까지 가능합니다." };
+    }
+
+    // Check availability
+    const { data: existing } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("username", newUsername.trim())
+        .single();
+
+    if (existing && existing.id !== user.id) {
+        return { success: false, error: "이미 사용 중인 닉네임입니다." };
+    }
+
+    const { error } = await supabase
+        .from("profiles")
+        .update({ username: newUsername.trim() })
+        .eq("id", user.id);
+
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath("/");
+    return { success: true };
+}
+
+// --- Report Actions ---
+
+import { sendEmail } from "@/lib/email";
+
+export async function submitReport(targetType: 'argument' | 'comment' | 'notice_comment', targetId: string, reason: string) {
+    const supabase = await createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return { success: false, error: "로그인이 필요합니다." };
+    if (!reason || reason.trim().length === 0) return { success: false, error: "신고 사유를 입력해주세요." };
+
+    // 1. Save to DB
+    const { error: dbError } = await supabase.from("reports").insert({
+        reporter_id: user.id,
+        target_type: targetType,
+        target_id: targetId,
+        reason: reason.trim()
+    });
+
+    if (dbError) return { success: false, error: "신고 접수 중 오류가 발생했습니다: " + dbError.message };
+
+    // 2. Send Email
+    // Fetch reporter username for context
+    const { data: profile } = await supabase.from("profiles").select("username").eq("id", user.id).single();
+    const reporterName = profile?.username || "Unknown";
+
+    const adminEmail = "youmga778@naver.com";
+    const subject = `[Logos Arena 신고] ${targetType} 신고 접수 (${reporterName})`;
+    const htmlBody = `
+        <h2>🚨 새로운 신고가 접수되었습니다.</h2>
+        <p><strong>신고자:</strong> ${reporterName} (${user.email})</p>
+        <p><strong>대상 유형:</strong> ${targetType}</p>
+        <p><strong>대상 ID:</strong> ${targetId}</p>
+        <p><strong>신고 사유:</strong><br/>${reason.trim()}</p>
+        <hr/>
+        <p>Logos Arena Admin System</p>
+    `;
+
+    // Only attempt email if SMTP is configured, otherwise just log
+    if (process.env.SMTP_USER) {
+        await sendEmail({
+            to: adminEmail,
+            subject: subject,
+            html: htmlBody
+        });
+    } else {
+        console.warn("SMTP_USER not set. Skipping email notification for report.");
+    }
+
+    return { success: true };
+}
