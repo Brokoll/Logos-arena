@@ -225,7 +225,7 @@ export function ArgumentItem({ argument, currentUser, userProfile }: ArgumentIte
                             />
                         </div>
                     ) : (
-                        <p className="text-lg md:text-xl font-serif font-light leading-loose text-foreground/90 whitespace-pre-wrap selection:bg-foreground/10 selection:text-foreground">
+                        <p className="text-lg md:text-xl font-serif font-light leading-loose text-foreground/90 whitespace-pre-wrap selection:bg-foreground/10 selection:text-foreground break-all">
                             {argument.content}
                         </p>
                     )}
@@ -342,7 +342,7 @@ export function ArgumentItem({ argument, currentUser, userProfile }: ArgumentIte
                                         </div>
                                     ) : (
                                         <>
-                                            <p className="font-medium">{comment.content}</p>
+                                            <p className="font-medium break-all">{comment.content}</p>
                                             {comment.image_urls && comment.image_urls.length > 0 && (
                                                 <div className="mt-2 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                                                     {comment.image_urls.map((url, idx) => (
