@@ -3,24 +3,36 @@
 import { useFormState } from "react-dom";
 import { createDebate } from "@/app/admin/actions";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { ImageUploader } from "@/components/ui/ImageUploader";
 
 const initialState = { error: "", success: false };
 
 export function DebateForm() {
     const [state, formAction] = useFormState(createDebate, initialState);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [imageUrl, setImageUrl] = useState<string>("");
+    const formRef = useRef<HTMLFormElement>(null);
 
     useEffect(() => {
         if (state?.success) {
             setShowSuccess(true);
+            setImageUrl("");
+            formRef.current?.reset();
             const timer = setTimeout(() => setShowSuccess(false), 5000);
             return () => clearTimeout(timer);
         }
     }, [state?.success]);
 
+    const handleImagesSelected = (urls: string[]) => {
+        // 첫 번째 이미지만 사용 (토론당 하나의 대표 이미지)
+        setImageUrl(urls[0] || "");
+    };
+
     return (
-        <form action={formAction} className="space-y-8">
+        <form ref={formRef} action={formAction} className="space-y-8">
+            <input type="hidden" name="image_url" value={imageUrl} />
+
             <div className="space-y-4">
                 <div>
                     <label htmlFor="topic" className="block text-sm font-black uppercase tracking-wider mb-2">
@@ -48,6 +60,28 @@ export function DebateForm() {
                         placeholder="토론 주제에 대한 추가 설명을 입력하세요..."
                         className="w-full bg-background border-[3px] border-foreground p-4 font-medium text-foreground placeholder:opacity-30 focus:outline-none focus:border-opacity-70 transition-all resize-none"
                     />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-black uppercase tracking-wider mb-2">
+                        대표 이미지 (선택)
+                    </label>
+                    <div className="border-[3px] border-foreground/30 border-dashed p-4">
+                        <ImageUploader
+                            onImagesSelected={handleImagesSelected}
+                            maxFiles={1}
+                            images={imageUrl ? [imageUrl] : []}
+                        />
+                        {imageUrl && (
+                            <div className="mt-4">
+                                <img
+                                    src={imageUrl}
+                                    alt="대표 이미지 미리보기"
+                                    className="max-h-48 rounded border border-foreground/20"
+                                />
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -109,3 +143,4 @@ export function DebateForm() {
         </form>
     );
 }
+

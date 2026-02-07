@@ -73,6 +73,15 @@ export default async function DebatePage({ params }: PageProps) {
                                     {debate.description}
                                 </p>
                             )}
+                            {debate.image_url && (
+                                <div className="max-w-2xl mx-auto pt-4">
+                                    <img
+                                        src={debate.image_url}
+                                        alt={debate.topic}
+                                        className="w-full rounded-lg border-[3px] border-foreground/20 shadow-2xl"
+                                    />
+                                </div>
+                            )}
                         </section>
 
                         {/* Arena Client (Form + Feed) */}

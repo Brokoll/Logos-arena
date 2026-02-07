@@ -16,6 +16,7 @@ export interface Database {
                     description: string | null
                     option_a: string
                     option_b: string
+                    image_url: string | null
                     status: 'active' | 'closed'
                     created_at: string
                 }
@@ -25,6 +26,7 @@ export interface Database {
                     description?: string | null
                     option_a?: string
                     option_b?: string
+                    image_url?: string | null
                     status?: 'active' | 'closed'
                     created_at?: string
                 }
@@ -34,6 +36,7 @@ export interface Database {
                     description?: string | null
                     option_a?: string
                     option_b?: string
+                    image_url?: string | null
                     status?: 'active' | 'closed'
                     created_at?: string
                 }
